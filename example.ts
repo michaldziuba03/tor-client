@@ -1,5 +1,4 @@
 import { HttpClient } from './lib/http';
-import { Socks } from './lib/socks';
 
 async function example() {
     const client = new HttpClient();

@@ -15,7 +15,7 @@ export class HttpClient {
             const options: RequestOptions = {
                 method: reqOptions.method,
                 headers: { ...reqOptions.headers, ...headers },
-                agent: new SocksAgent({ host: 'localhost', port: 9050 }),
+                agent: new SocksAgent({ socksHost: 'localhost', socksPort: 9050 }),
             }
 
             const request = client.request(url, options, (res) => {

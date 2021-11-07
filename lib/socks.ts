@@ -18,7 +18,7 @@ export class Socks {
     connect(host: string, port: number) {
         const authRequest = [socksVersion, authMethods, authMethod];
 
-        this.socket.once('data', (chunk: Buffer) => {
+        this.socket.once('data', chunk => {
             if (chunk.length !== 2) {
                 throw new Error('Invalid SOCKS response size');
             }
@@ -48,7 +48,7 @@ export class Socks {
         const buffer = Buffer.from(request);
         buffer.writeUInt16BE(port, buffer.length - 2);
 
-        this.socket.once('data', (chunk) => {
+        this.socket.once('data', chunk => {
             if (chunk[0] !== socksVersion) {
                 throw new Error('Invalid SOCKS version in response');
             }
