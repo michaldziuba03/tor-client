@@ -1,5 +1,4 @@
-import { Agent, AgentOptions, ClientRequest } from 'http';
-import { RequestOptions } from 'https';
+import { Agent, AgentOptions } from 'http';
 import { Socks } from './socks';
 
 interface SocksOptions extends AgentOptions {
@@ -15,21 +14,8 @@ export class SocksAgent extends Agent {
         this.socks = new Socks(options.socksHost, options.socksPort);
     }
 
-    async callback(req: ClientRequest, options: RequestOptions) {
-        let { host, port } = options;
-
-        if (!host) {
-            throw new Error('Host not definied');
-        }
-
-        if (typeof port === 'string') {
-            port = parseInt(port);
-        }
-
-        if (!port) {
-            port = 80;
-        }
-
-        this.socks.connect(host, port);
+    createConnection(options: any) {
+        console.log(options.host, options.port);
+        this.socks.connect(options.host, options.port);
     }
 }

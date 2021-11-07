@@ -61,6 +61,8 @@ export class Socks {
             if (chunk[2] !== reserved) {
                 throw new Error('Invalid SOCKS response shape');
             }
+
+            console.log('Successfuly connected to Tor SOCKS5');
         });
 
         this.socket.write(buffer);
