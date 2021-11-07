@@ -1,4 +1,5 @@
 import net, { Socket, isIP } from 'net';
+import { EventEmitter } from 'stream';
 import { getSocksError } from './constants';
 
 const socksVersion = 0x05;
@@ -7,12 +8,20 @@ const authMethod = 0x00;
 
 export class Socks {
     readonly socket: Socket;
+    readonly emitter = new EventEmitter();
 
     constructor(socksHost: string, socksPort: number) {
         this.socket = net.connect({
             host: socksHost,
             port: socksPort,
         });
+    }
+
+    on(event: "connect", listner: () => void): this;
+    on(event: "data", listner: (chunk: Buffer) => void): this;
+    on(event: any, listener: any) {
+        this.emitter.addListener(event, listener);
+        return this;
     }
 
     connect(host: string, port: number) {
@@ -63,6 +72,10 @@ export class Socks {
             }
 
             console.log('Successfuly connected to Tor SOCKS5');
+            this.socket.on('data', data => {
+                this.emitter.emit('data', data); // resending chunks;
+            })
+            this.emitter.emit('connect');
         });
 
         this.socket.write(buffer);

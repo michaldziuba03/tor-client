@@ -1,4 +1,5 @@
 import { Agent, AgentOptions } from 'http';
+import { AgentSocket } from './socket';
 import { Socks } from './socks';
 
 interface SocksOptions extends AgentOptions {
@@ -17,5 +18,8 @@ export class SocksAgent extends Agent {
     createConnection(options: any) {
         console.log(options.host, options.port);
         this.socks.connect(options.host, options.port);
+        const socket = new AgentSocket(this.socks);
+
+        return socket;
     }
 }
