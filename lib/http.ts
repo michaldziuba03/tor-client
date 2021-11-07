@@ -1,5 +1,6 @@
 import http from 'http';
 import https, { RequestOptions } from 'https';
+import { SocksAgent } from './agent';
 import { ALLOWED_PROTOCOLS, HttpMethod, MimeTypes } from './constants';
 import { formParser } from './parsers';
 import { SendOptions } from './types';
@@ -9,13 +10,12 @@ const headers = {
 }
 
 export class HttpClient {
-    constructor() {}
-
     private sendRequest(url: string, client: typeof http | typeof https, reqOptions: SendOptions) {
         return new Promise((resolve, reject) => {
             const options: RequestOptions = {
                 method: reqOptions.method,
                 headers: { ...reqOptions.headers, ...headers },
+                agent: new SocksAgent({ host: 'localhost', port: 9050 }),
             }
 
             const request = client.request(url, options, (res) => {
