@@ -27,3 +27,15 @@ $ sudo systemctl start tor.service
 ```bash
 $ sudo apt install tor
 ```
+
+### Code example
+```ts
+const client = new TorClient();
+const result = await client.get('https://check.torproject.org/');
+// status (number):
+console.log(result.status);
+// data (string by default):
+console.log(result.data);
+// headers (object):
+console.log(result.headers);
+```
