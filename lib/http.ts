@@ -1,17 +1,24 @@
-import http from 'http';
+import http, { IncomingMessage } from 'http';
 import https, { RequestOptions } from 'https';
-import { SocksAgent } from './agent';
 import { ALLOWED_PROTOCOLS, HttpMethod, MimeTypes } from './constants';
 import { formParser } from './parsers';
-import { SendOptions } from './types';
+import { HttpResponse, SendOptions } from './types';
 
 const headers = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; rv:78.0) Gecko/20100101 Firefox/78.0',
 }
 
+
+function buildResponse(res: IncomingMessage, data: string): HttpResponse {
+    const status = res.statusCode || 200;
+    const headers = res.headers;
+
+    return { status, headers, data }
+}
+
 export class HttpClient {
     private sendRequest(url: string, client: typeof http | typeof https, reqOptions: SendOptions, agent: any) {
-        return new Promise((resolve, reject) => {
+        return new Promise<HttpResponse>((resolve, reject) => {
             const options: RequestOptions = {
                 method: reqOptions.method,
                 headers: { ...reqOptions.headers, ...headers },
@@ -30,7 +37,8 @@ export class HttpClient {
                 });
 
                 res.on('close', () => {
-                    resolve(data);
+                    const response = buildResponse(res, data);
+                    resolve(response);
                 });
             });
 
