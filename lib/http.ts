@@ -10,12 +10,12 @@ const headers = {
 }
 
 export class HttpClient {
-    private sendRequest(url: string, client: typeof http | typeof https, reqOptions: SendOptions) {
+    private sendRequest(url: string, client: typeof http | typeof https, reqOptions: SendOptions, agent: any) {
         return new Promise((resolve, reject) => {
             const options: RequestOptions = {
                 method: reqOptions.method,
                 headers: { ...reqOptions.headers, ...headers },
-                agent: new SocksAgent({ socksHost: 'localhost', socksPort: 9050 }),
+                agent,
             }
 
             const request = client.request(url, options, (res) => {
@@ -45,24 +45,24 @@ export class HttpClient {
         });
     }
 
-    private request(url: string, reqOptions: SendOptions) {
+    private request(url: string, reqOptions: SendOptions, agent: any) {
         const { protocol } = new URL(url);
         if (!ALLOWED_PROTOCOLS.includes(protocol)) {
             throw Error('Invalid request protocol!');
         }
 
         if (protocol === 'http:') {
-            return this.sendRequest(url, http, reqOptions);
+            return this.sendRequest(url, http, reqOptions, agent);
         }
 
-        return this.sendRequest(url, https, reqOptions);
+        return this.sendRequest(url, https, reqOptions, agent);
     }
 
-    get<T>(url: string) {
-        return this.request(url, { method: HttpMethod.GET });
+    get<T>(url: string, agent: any) {
+        return this.request(url, { method: HttpMethod.GET }, agent);
     }
 
-    post<T>(url: string, data: object) {
+    post<T>(url: string, data: object, agent: any) {
         const dataString = formParser(data);
         return this.request(url, { 
             method: HttpMethod.POST, 
@@ -71,6 +71,6 @@ export class HttpClient {
                 'Content-Type': MimeTypes.FORM,
                 'Content-Length': dataString.length,
             }
-        });
+        }, agent);
     }
 }

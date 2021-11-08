@@ -1,25 +1,37 @@
 import { Agent, AgentOptions } from 'http';
-import { AgentSocket } from './socket';
-import { Socks } from './socks';
+import { Agent as AgentS, AgentOptions as AgentOptionsS } from 'https';
+import { Socket } from 'net';
 
-interface SocksOptions extends AgentOptions {
-    socksHost: string;
-    socksPort: number;
+interface SocksOptions extends AgentOptions, AgentOptionsS {
+    socksSocket: Socket;
 }
 
 export class SocksAgent extends Agent {
-    private readonly socks: Socks;
+    private socksSocket: Socket;
 
     constructor(options: SocksOptions) {
         super(options);
-        this.socks = new Socks(options.socksHost, options.socksPort);
+        this.socksSocket = options.socksSocket;
     }
 
     createConnection(options: any) {
         console.log(options.host, options.port);
-        this.socks.connect(options.host, options.port);
-        const socket = new AgentSocket(this.socks);
 
-        return socket;
+        return this.socksSocket;
+    }
+}
+
+export class SocksAgentS extends AgentS {
+    private socksSocket: Socket;
+
+    constructor(options: SocksOptions) {
+        super(options);
+        this.socksSocket = options.socksSocket;
+    }
+
+    createConnection(options: any) {
+        console.log(options.host, options.port);
+
+        return this.socksSocket;
     }
 }

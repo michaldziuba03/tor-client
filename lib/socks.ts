@@ -1,5 +1,4 @@
 import net, { Socket, isIP } from 'net';
-import { EventEmitter } from 'stream';
 import { getSocksError } from './constants';
 
 const socksVersion = 0x05;
@@ -8,7 +7,6 @@ const authMethod = 0x00;
 
 export class Socks {
     readonly socket: Socket;
-    readonly emitter = new EventEmitter();
 
     constructor(socksHost: string, socksPort: number) {
         this.socket = net.connect({
@@ -17,36 +15,34 @@ export class Socks {
         });
     }
 
-    on(event: "connect", listner: () => void): this;
-    on(event: "data", listner: (chunk: Buffer) => void): this;
-    on(event: any, listener: any) {
-        this.emitter.addListener(event, listener);
-        return this;
-    }
-
     connect(host: string, port: number) {
         const authRequest = [socksVersion, authMethods, authMethod];
 
-        this.socket.once('data', chunk => {
-            if (chunk.length !== 2) {
-                throw new Error('Invalid SOCKS response size');
-            }
+        return new Promise((resolve, reject) => {
+            this.socket.once('data', chunk => {
+                if (chunk.length !== 2) {
+                    throw new Error('Invalid SOCKS response size');
+                }
+    
+                if (chunk[0] !== socksVersion) {
+                    throw new Error('Invalid SOCKS version in response');
+                }
+    
+                if (chunk[1] !== authMethod) {
+                    throw new Error('Unexpected SOCKS authentication method');
+                }
+    
+                this.request(host, port, resolve, reject);
+            });
 
-            if (chunk[0] !== socksVersion) {
-                throw new Error('Invalid SOCKS version in response');
-            }
-
-            if (chunk[1] !== authMethod) {
-                throw new Error('Unexpected SOCKS authentication method');
-            }
-
-            this.request(host, port);
-        });
-
-        this.socket.write(Buffer.from(authRequest));
+            this.socket.on('error', (err) => reject(err));
+    
+            this.socket.write(Buffer.from(authRequest));
+        })
+        
     }
 
-    private request(host: string, port: number) {
+    private request(host: string, port: number, resolve: any, reject: any) {
         const cmd = 0x01; // TCP/IP stream connection;
         const reserved = 0x00; // reserved byte;
         const parsedHost = parseHost(host);
@@ -71,11 +67,7 @@ export class Socks {
                 throw new Error('Invalid SOCKS response shape');
             }
 
-            console.log('Successfuly connected to Tor SOCKS5');
-            this.socket.on('data', data => {
-                this.emitter.emit('data', data); // resending chunks;
-            })
-            this.emitter.emit('connect');
+            resolve(this.socket);
         });
 
         this.socket.write(buffer);
