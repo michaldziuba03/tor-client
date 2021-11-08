@@ -21,6 +21,7 @@ $ npm install @mich4l/tor-client
 ```bash
 $ sudo pacman -S tor
 $ sudo systemctl enable tor.service
+$ sudo systemctl start tor.service
 ```
 ##### Debian/Ubuntu/Mint
 ```bash
