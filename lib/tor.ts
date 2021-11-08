@@ -1,4 +1,5 @@
 import { Socket } from "net";
+import { TLSSocket } from 'tls';
 import { SocksAgent, SocksAgentS } from "./agent";
 import { HttpClient } from "./http";
 import { Socks } from "./socks";
@@ -8,7 +9,8 @@ function createAgent(protocol: string, socket: Socket) {
         return new SocksAgent({ socksSocket: socket});
     }
 
-    return new SocksAgentS({ socksSocket: socket });
+    const tlsUpgrade = new TLSSocket(socket);
+    return new SocksAgentS({ socksSocket: tlsUpgrade });
 }
 
 export class TorClient {
