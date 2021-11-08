@@ -9,3 +9,20 @@
 - Simple codebase;
 - Same `User-Agent` as in Tor Browser;
 - Written in TypeScript;
+
+### Installation
+Install npm package
+```bash
+$ npm install @mich4l/tor-client
+```
+
+#### Install Tor (Linux)
+##### Arch/Manjaro/Garuda
+```bash
+$ sudo pacman -S tor
+$ sudo systemctl enable tor.service
+```
+##### Debian/Ubuntu/Mint
+```bash
+$ sudo apt install tor
+```
