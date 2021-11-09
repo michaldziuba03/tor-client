@@ -38,9 +38,14 @@ export class TorClient {
             this.options.socksHost as string, 
             this.options.socksPort as number
         );
-        
+
         const socket = await socks.connect(urlObj.host, port) as Socket;
         const agent = createAgent(urlObj.protocol, socket);
         return this.http.get(url, agent);
+    }
+
+    async torcheck() {
+        const result = await this.get('https://check.torproject.org/');
+        return result.data.includes('Congratulations. This browser is configured to use Tor');
     }
 }

@@ -14,9 +14,7 @@ export class HttpAgent extends Agent {
         this.socksSocket = options.socksSocket;
     }
 
-    createConnection(options: any) {
-        console.log(options.host, options.port);
-
+    createConnection() {
         return this.socksSocket;
     }
 }
@@ -29,9 +27,7 @@ export class HttpsAgent extends AgentS {
         this.socksSocket = options.socksSocket;
     }
 
-    createConnection(options: any) {
-        console.log(options.host, options.port);
-
+    createConnection() {
         return this.socksSocket;
     }
 }

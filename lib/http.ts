@@ -1,18 +1,12 @@
-import http, { IncomingMessage, RequestOptions } from 'http';
+import http, { RequestOptions } from 'http';
 import https from 'https';
 import { ALLOWED_PROTOCOLS, HttpMethod, MimeTypes } from './constants';
 import { formParser } from './parsers';
 import { HttpResponse, SendOptions, SocksAgent, IRequestOptions } from './types';
+import { buildResponse } from './utils';
 
 const headers = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; rv:78.0) Gecko/20100101 Firefox/78.0',
-}
-
-function buildResponse(res: IncomingMessage, data: string): HttpResponse {
-    const status = res.statusCode || 200;
-    const headers = res.headers;
-
-    return { status, headers, data }
 }
 
 export class HttpClient {
@@ -36,8 +30,6 @@ export class HttpClient {
                     reject(err);
                 });
 
-                res.on('end', () => console.log('End LOL'));
-
                 res.on('close', () => {
                     const response = buildResponse(res, data);
                     resolve(response);
@@ -50,7 +42,7 @@ export class HttpClient {
 
             request.end();
 
-            request.on('timeout', () => reject(new Error('Request timeout')));
+            request.on('timeout', () => reject(new Error('Http request timeout')));
             request.on('error', (err) => reject(err));
         });
     }

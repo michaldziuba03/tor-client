@@ -39,3 +39,29 @@ console.log(result.data);
 // headers (object):
 console.log(result.headers);
 ```
+
+### Documentation
+#### Configuration for `SOCKS5` proxy
+```ts
+const client = new TorClient({ 
+  socksHost: 'localhost' 
+  socksPort: 2137,
+});
+```
+By default client connects with `localhost:9050`.
+
+#### `.torcheck()`
+Ping `https://check.torproject.org/` to check Tor connection status.
+```ts
+const client = new TorClient();
+const isUsed = await client.torcheck();
+console.log(isUsed); // true or false
+```
+
+#### `.get(url)`
+Make http GET request (works with regular and `.onion` sites).
+```ts
+const client = new TorClient();
+const result = await client.get('http://juhanurmihxlp77nkq76byazcldy2hlmovfu2epvl5ankdibsot4csyd.onion/');
+console.log(result.data); // HTML -> string
+```
