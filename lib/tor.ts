@@ -1,20 +1,31 @@
 import { Socket } from "net";
 import { TLSSocket } from 'tls';
-import { SocksAgent, SocksAgentS } from "./agent";
+import { HttpAgent, HttpsAgent } from "./agent";
 import { HttpClient } from "./http";
 import { Socks } from "./socks";
+import { TorClientOptions } from "./types";
 
 function createAgent(protocol: string, socket: Socket) {
     if (protocol === 'http:') {
-        return new SocksAgent({ socksSocket: socket});
+        return new HttpAgent({ socksSocket: socket });
     }
 
-    const tlsUpgrade = new TLSSocket(socket);
-    return new SocksAgentS({ socksSocket: tlsUpgrade });
+    const tlsSocket = new TLSSocket(socket);
+    return new HttpsAgent({ socksSocket: tlsSocket });
+}
+
+const defaultOptions: TorClientOptions = {
+    socksHost: 'localhost',
+    socksPort: 9050,
 }
 
 export class TorClient {
     private readonly http = new HttpClient();
+    private readonly options: TorClientOptions;
+
+    constructor(options: TorClientOptions = defaultOptions) {
+        this.options = options;
+    }
 
     async get(url: string) {
         const urlObj = new URL(url);
@@ -22,7 +33,12 @@ export class TorClient {
         if (urlObj.port || urlObj.port !== '') {
             port = parseInt(urlObj.port);
         }
-        const socks = new Socks('localhost', 9050);
+
+        const socks = new Socks(
+            this.options.socksHost as string, 
+            this.options.socksPort as number
+        );
+        
         const socket = await socks.connect(urlObj.host, port) as Socket;
         const agent = createAgent(urlObj.protocol, socket);
         return this.http.get(url, agent);

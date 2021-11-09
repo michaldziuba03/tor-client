@@ -1,13 +1,12 @@
-import http, { IncomingMessage } from 'http';
-import https, { RequestOptions } from 'https';
+import http, { IncomingMessage, RequestOptions } from 'http';
+import https from 'https';
 import { ALLOWED_PROTOCOLS, HttpMethod, MimeTypes } from './constants';
 import { formParser } from './parsers';
-import { HttpResponse, SendOptions } from './types';
+import { HttpResponse, SendOptions, SocksAgent, IRequestOptions } from './types';
 
 const headers = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; rv:78.0) Gecko/20100101 Firefox/78.0',
 }
-
 
 function buildResponse(res: IncomingMessage, data: string): HttpResponse {
     const status = res.statusCode || 200;
@@ -17,11 +16,12 @@ function buildResponse(res: IncomingMessage, data: string): HttpResponse {
 }
 
 export class HttpClient {
-    private sendRequest(url: string, client: typeof http | typeof https, reqOptions: SendOptions, agent: any) {
+    private sendRequest(options: SendOptions, agent: SocksAgent) {
+        const { url, client, requestOptions } = options;
         return new Promise<HttpResponse>((resolve, reject) => {
             const options: RequestOptions = {
-                method: reqOptions.method,
-                headers: { ...reqOptions.headers, ...headers },
+                method: requestOptions.method,
+                headers: { ...requestOptions.headers, ...headers },
                 agent,
             }
 
@@ -36,14 +36,16 @@ export class HttpClient {
                     reject(err);
                 });
 
+                res.on('end', () => console.log('End LOL'));
+
                 res.on('close', () => {
                     const response = buildResponse(res, data);
                     resolve(response);
                 });
             });
 
-            if (reqOptions.data) {
-                request.write(reqOptions.data);
+            if (requestOptions.data) {
+                request.write(requestOptions.data);
             }
 
             request.end();
@@ -53,24 +55,31 @@ export class HttpClient {
         });
     }
 
-    private request(url: string, reqOptions: SendOptions, agent: any) {
+    private request(url: string, requestOptions: IRequestOptions, agent: SocksAgent) {
         const { protocol } = new URL(url);
         if (!ALLOWED_PROTOCOLS.includes(protocol)) {
             throw Error('Invalid request protocol!');
         }
 
-        if (protocol === 'http:') {
-            return this.sendRequest(url, http, reqOptions, agent);
+        const sendOptions: SendOptions = {
+            url,
+            requestOptions,
+            client: https,
         }
 
-        return this.sendRequest(url, https, reqOptions, agent);
+        if (protocol === 'http:') {
+            sendOptions.client = http;
+            return this.sendRequest(sendOptions, agent);
+        }
+
+        return this.sendRequest(sendOptions, agent);
     }
 
-    get<T>(url: string, agent: any) {
+    get(url: string, agent: SocksAgent) {
         return this.request(url, { method: HttpMethod.GET }, agent);
     }
 
-    post<T>(url: string, data: object, agent: any) {
+    post(url: string, data: object, agent: SocksAgent) {
         const dataString = formParser(data);
         return this.request(url, { 
             method: HttpMethod.POST, 

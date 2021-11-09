@@ -6,7 +6,7 @@ interface SocksOptions extends AgentOptions, AgentOptionsS {
     socksSocket: Socket;
 }
 
-export class SocksAgent extends Agent {
+export class HttpAgent extends Agent {
     private socksSocket: Socket;
 
     constructor(options: SocksOptions) {
@@ -21,7 +21,7 @@ export class SocksAgent extends Agent {
     }
 }
 
-export class SocksAgentS extends AgentS {
+export class HttpsAgent extends AgentS {
     private socksSocket: Socket;
 
     constructor(options: SocksOptions) {
