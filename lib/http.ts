@@ -3,7 +3,7 @@ import https from 'https';
 import { ALLOWED_PROTOCOLS, headers, HttpMethod, MimeTypes } from './constants';
 import { formParser } from './parsers';
 import { HttpResponse, SendOptions, SocksAgent, IRequestOptions, TorRequestOptions } from './types';
-import { buildResponse, randomFilename } from './utils';
+import { buildResponse, generateFilename } from './utils';
 import { createWriteStream } from 'fs';
 
 export class HttpClient {
@@ -44,7 +44,7 @@ export class HttpClient {
         });
     }
 
-    download(options: SendOptions, agent: SocksAgent, path?: string) {
+    download(options: SendOptions, agent: SocksAgent, path: string) {
         const { url, client, requestOptions } = options;
         return new Promise<string>((resolve, reject) => {
             const options: RequestOptions = {
@@ -54,9 +54,7 @@ export class HttpClient {
             }
 
             const request = client.request(url, options, (res) => {
-                console.log(res.headers);
-                const finalPath = path || randomFilename();
-                const fileStream = createWriteStream(finalPath);
+                const fileStream = createWriteStream(path);
 
                 res.on('data', (chunk) => {
                     fileStream.write(chunk);
@@ -71,7 +69,7 @@ export class HttpClient {
 
                 res.on('close', () => {
                     fileStream.end();
-                    resolve(finalPath);
+                    resolve(path);
                 });
             });
 

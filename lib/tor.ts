@@ -8,6 +8,7 @@ import { TorClientOptions, TorDownloadOptions, TorRequestOptions } from "./types
 
 import * as https from 'https';
 import * as http from 'http';
+import { generateFilename } from "./utils";
 
 function createAgent(protocol: string, socket: Socket) {
     if (protocol === 'http:') {
@@ -38,7 +39,7 @@ export class TorClient {
             port = parseInt(urlObj.port);
         }
 
-        return { port, host: urlObj.host, protocol: urlObj.protocol }
+        return { port, host: urlObj.host, protocol: urlObj.protocol, pathname: urlObj.pathname }
     }
 
     private connectSocks(host: string, port: number) {
@@ -51,8 +52,9 @@ export class TorClient {
     }
 
     async download(url: string, options: TorDownloadOptions = {}) {
-        const { protocol, host, port } = this.getDestination(url);
+        const { protocol, host, port, pathname } = this.getDestination(url);
         
+        const path = options.path || generateFilename(pathname);
         const socket = await this.connectSocks(host, port);
         const agent = createAgent(protocol, socket);
         const client = protocol === 'http:' ? http : https;
