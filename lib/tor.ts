@@ -66,7 +66,7 @@ export class TorClient {
                 method: HttpMethod.GET, 
                 headers: { ...headers, ...options.headers },
             },
-        }, agent, options.path);
+        }, agent, path);
     }
 
     async get(url: string, options?: TorRequestOptions) {
