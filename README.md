@@ -50,7 +50,7 @@ const client = new TorClient({
 ```
 By default client connects with `localhost:9050`.
 
-#### `.torcheck()`
+#### `.torcheck(options?)`
 Ping `https://check.torproject.org/` to check Tor connection status.
 ```ts
 const client = new TorClient();
@@ -58,10 +58,20 @@ const isUsed = await client.torcheck();
 console.log(isUsed); // true or false
 ```
 
-#### `.get(url)`
+#### `.get(url, options?)`
 Make http GET request (works with regular and `.onion` sites).
 ```ts
 const client = new TorClient();
-const result = await client.get('http://juhanurmihxlp77nkq76byazcldy2hlmovfu2epvl5ankdibsot4csyd.onion/');
+const url = 'http://juhanurmihxlp77nkq76byazcldy2hlmovfu2epvl5ankdibsot4csyd.onion/?q=tor';
+const result = await client.get(url);
+console.log(result.data); // HTML -> string
+```
+
+#### `.post(url, data, options?)`
+Make http POST request (works with regular and `.onion` sites).
+```ts
+const client = new TorClient();
+const url = 'https://duckduckgogg42xjoc72x3sjasowoarfbgcmvfimaftt6twagswzczad.onion/';
+const result = await client.post(url, { q: 'tor' });
 console.log(result.data); // HTML -> string
 ```

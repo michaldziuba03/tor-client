@@ -3,7 +3,7 @@ import { TLSSocket } from 'tls';
 import { HttpAgent, HttpsAgent } from "./agent";
 import { HttpClient } from "./http";
 import { Socks } from "./socks";
-import { TorClientOptions } from "./types";
+import { TorClientOptions, TorRequestOptions } from "./types";
 
 function createAgent(protocol: string, socket: Socket) {
     if (protocol === 'http:') {
@@ -27,25 +27,45 @@ export class TorClient {
         this.options = options;
     }
 
-    async get(url: string) {
+    private getDestination(url: string) {
         const urlObj = new URL(url);
         let port =  urlObj.protocol === 'http:' ? 80 : 443;
         if (urlObj.port || urlObj.port !== '') {
             port = parseInt(urlObj.port);
         }
 
+        return { port, host: urlObj.host, protocol: urlObj.protocol }
+    }
+
+    private connectSocks(host: string, port: number) {
         const socks = new Socks(
             this.options.socksHost as string, 
             this.options.socksPort as number
         );
 
-        const socket = await socks.connect(urlObj.host, port) as Socket;
-        const agent = createAgent(urlObj.protocol, socket);
+        return socks.connect(host, port);
+    }
+
+    async get(url: string, options?: TorRequestOptions) {
+        const { protocol, host, port } = this.getDestination(url);
+
+        const socket = await this.connectSocks(host, port);
+        const agent = createAgent(protocol, socket);
+
         return this.http.get(url, agent);
     }
 
-    async torcheck() {
-        const result = await this.get('https://check.torproject.org/');
+    async post(url: string, data: object, options?: TorRequestOptions) {
+        const { protocol, host, port } = this.getDestination(url);
+
+        const socket = await this.connectSocks(host, port);
+        const agent = createAgent(protocol, socket);
+        
+        return this.http.post(url, data, agent);
+    }
+
+    async torcheck(options?: TorRequestOptions) {
+        const result = await this.get('https://check.torproject.org/', options);
         return result.data.includes('Congratulations. This browser is configured to use Tor');
     }
 }

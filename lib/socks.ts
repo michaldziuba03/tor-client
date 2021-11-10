@@ -18,7 +18,7 @@ export class Socks {
     connect(host: string, port: number) {
         const authRequest = [socksVersion, authMethods, authMethod];
 
-        return new Promise((resolve, reject) => {
+        return new Promise<Socket>((resolve, reject) => {
             this.socket.once('data', chunk => {
                 if (chunk.length !== 2) {
                     throw new Error('Invalid SOCKS response size');
