@@ -75,3 +75,18 @@ const url = 'https://duckduckgogg42xjoc72x3sjasowoarfbgcmvfimaftt6twagswzczad.on
 const result = await client.post(url, { q: 'tor' });
 console.log(result.data); // HTML -> string
 ```
+
+#### Passing options for requests
+You can overwrite headers.
+```ts
+const client = new TorClient();
+const result = await client.get('https://www.deviceinfo.me/', {
+    headers: {
+      'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.69 Safari/537.36',
+  }
+});
+
+console.log(result.data);
+```
+
+By default TorClient uses `User-Agent`: `Mozilla/5.0 (Windows NT 10.0; rv:78.0) Gecko/20100101 Firefox/78.0` (from Tor Browser - most popular Tor client).
