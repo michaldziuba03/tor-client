@@ -62,7 +62,7 @@ console.log(isUsed); // true or false
 Make http GET request (works with regular and `.onion` sites).
 ```ts
 const client = new TorClient();
-const url = 'http://juhanurmihxlp77nkq76byazcldy2hlmovfu2epvl5ankdibsot4csyd.onion/?q=tor';
+const url = 'https://duckduckgogg42xjoc72x3sjasowoarfbgcmvfimaftt6twagswzczad.onion/?q=tor';
 const result = await client.get(url);
 console.log(result.data); // HTML -> string
 ```
