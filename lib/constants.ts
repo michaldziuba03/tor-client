@@ -11,6 +11,10 @@ export enum MimeTypes {
     FORM = 'application/x-www-form-urlencoded',
 }
 
+export const headers = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; rv:78.0) Gecko/20100101 Firefox/78.0',
+}
+
 export function getSocksError(status: number) {
     switch(status) {
         case 0x01:

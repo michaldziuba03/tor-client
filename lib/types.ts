@@ -15,6 +15,10 @@ export interface TorRequestOptions {
     headers?: object;
 }
 
+export interface TorDownloadOptions extends TorRequestOptions {
+    path?: string;
+}
+
 export interface SendOptions {
     url: string;
     requestOptions: IRequestOptions;

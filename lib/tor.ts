@@ -1,9 +1,11 @@
 import { Socket } from "net";
 import { TLSSocket } from 'tls';
 import { HttpAgent, HttpsAgent } from "./agent";
+import { headers, HttpMethod } from "./constants";
 import { HttpClient } from "./http";
 import { Socks } from "./socks";
-import { TorClientOptions, TorRequestOptions } from "./types";
+import { TorClientOptions, TorDownloadOptions, TorRequestOptions } from "./types";
+import * as https from 'https';
 
 function createAgent(protocol: string, socket: Socket) {
     if (protocol === 'http:') {
@@ -44,6 +46,22 @@ export class TorClient {
         );
 
         return socks.connect(host, port);
+    }
+
+    async download(url: string, options: TorDownloadOptions = {}) {
+        const { protocol, host, port } = this.getDestination(url);
+        
+        const socket = await this.connectSocks(host, port);
+        const agent = createAgent(protocol, socket);
+
+        return this.http.download({
+            url,
+            client: https,
+            requestOptions: { 
+                method: HttpMethod.GET, 
+                headers: { ...headers, ...options.headers },
+            },
+        }, agent, options.path);
     }
 
     async get(url: string, options?: TorRequestOptions) {

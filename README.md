@@ -76,6 +76,17 @@ const result = await client.post(url, { q: 'tor' });
 console.log(result.data); // HTML -> string
 ```
 
+#### `.download(url, options?)`
+Download response body to file (implementation based on Node.js Streams and works with binaries and text files)
+```ts
+const client = new TorClient();
+const resultPath = await client.download('<any-url.png>', {
+  path: './myfile.png',
+});
+
+console.log(resultPath); // string
+```
+
 #### Passing options for requests
 You can pass you custom headers.
 ```ts

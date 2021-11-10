@@ -1,13 +1,14 @@
-import { stdout } from 'process';
 import { TorClient } from './lib/tor';
 
 async function example() {
     const client = new TorClient();
 
     try {
-        const result = await client.get('https://duckduckgogg42xjoc72x3sjasowoarfbgcmvfimaftt6twagswzczad.onion/?q=tor');
+        const path = await client.download('https://i1.jbzd.com.pl/contents/2021/11/normal/1PC6LnoPXmKGXbJE5nM2fNqFddaaxi2y.jpg', {
+            path: './dzidka.jpg',
+        });
 
-        stdout.write(result.data);
+        console.log(path);
     } catch (err) {
         console.log(err);
     }
