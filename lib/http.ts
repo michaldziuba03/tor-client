@@ -2,7 +2,7 @@ import http, { RequestOptions } from 'http';
 import https from 'https';
 import { ALLOWED_PROTOCOLS, HttpMethod, MimeTypes } from './constants';
 import { formParser } from './parsers';
-import { HttpResponse, SendOptions, SocksAgent, IRequestOptions } from './types';
+import { HttpResponse, SendOptions, SocksAgent, IRequestOptions, TorRequestOptions } from './types';
 import { buildResponse } from './utils';
 
 const headers = {
@@ -15,7 +15,7 @@ export class HttpClient {
         return new Promise<HttpResponse>((resolve, reject) => {
             const options: RequestOptions = {
                 method: requestOptions.method,
-                headers: { ...requestOptions.headers, ...headers },
+                headers: { ...headers, ...requestOptions.headers },
                 agent,
             }
 
@@ -67,11 +67,17 @@ export class HttpClient {
         return this.sendRequest(sendOptions, agent);
     }
 
-    get(url: string, agent: SocksAgent) {
-        return this.request(url, { method: HttpMethod.GET }, agent);
+    get(url: string, agent: SocksAgent, options: TorRequestOptions = {}) {
+        return this.request(
+            url, 
+            { 
+                method: HttpMethod.GET,
+                headers: options.headers || {}, 
+            },
+            agent);
     }
 
-    post(url: string, data: object, agent: SocksAgent) {
+    post(url: string, data: object, agent: SocksAgent, options: TorRequestOptions = {}) {
         const dataString = formParser(data);
         return this.request(url, { 
             method: HttpMethod.POST, 
@@ -79,6 +85,7 @@ export class HttpClient {
             headers: {
                 'Content-Type': MimeTypes.FORM,
                 'Content-Length': dataString.length,
+                ...options.headers,
             }
         }, agent);
     }

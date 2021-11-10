@@ -52,7 +52,7 @@ export class TorClient {
         const socket = await this.connectSocks(host, port);
         const agent = createAgent(protocol, socket);
 
-        return this.http.get(url, agent);
+        return this.http.get(url, agent, options);
     }
 
     async post(url: string, data: object, options?: TorRequestOptions) {
@@ -60,12 +60,16 @@ export class TorClient {
 
         const socket = await this.connectSocks(host, port);
         const agent = createAgent(protocol, socket);
-        
-        return this.http.post(url, data, agent);
+
+        return this.http.post(url, data, agent, options);
     }
 
     async torcheck(options?: TorRequestOptions) {
         const result = await this.get('https://check.torproject.org/', options);
+        if (!result.status || result.status !== 200) {
+            throw new Error(`Network error with check.torproject.org, status code: ${result.status}`);
+        }
+
         return result.data.includes('Congratulations. This browser is configured to use Tor');
     }
 }

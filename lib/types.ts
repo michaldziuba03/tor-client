@@ -8,7 +8,7 @@ import * as https from 'https';
 export interface IRequestOptions {
     method: HttpMethod;
     data?: any;
-    headers?: object;
+    headers: { [x: string]: string } | {};
 }
 
 export interface TorRequestOptions {
