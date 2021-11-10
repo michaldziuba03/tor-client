@@ -5,7 +5,9 @@ import { headers, HttpMethod } from "./constants";
 import { HttpClient } from "./http";
 import { Socks } from "./socks";
 import { TorClientOptions, TorDownloadOptions, TorRequestOptions } from "./types";
+
 import * as https from 'https';
+import * as http from 'http';
 
 function createAgent(protocol: string, socket: Socket) {
     if (protocol === 'http:') {
@@ -53,10 +55,11 @@ export class TorClient {
         
         const socket = await this.connectSocks(host, port);
         const agent = createAgent(protocol, socket);
+        const client = protocol === 'http:' ? http : https;
 
         return this.http.download({
             url,
-            client: https,
+            client,
             requestOptions: { 
                 method: HttpMethod.GET, 
                 headers: { ...headers, ...options.headers },
