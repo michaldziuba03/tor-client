@@ -12,8 +12,8 @@ export function buildResponse(res: IncomingMessage, data: string): HttpResponse 
 export function generateFilename(pathname: string) {
     const filename = pathname.split('/').pop();
     if (!filename || filename === '') {
-        return `./${Date.now()}${randomBytes(6).toString('hex')}`;
+        return `${Date.now()}${randomBytes(6).toString('hex')}`;
     }
 
-    return `./${filename}`;
+    return `${filename}`;
 }

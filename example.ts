@@ -4,7 +4,9 @@ async function example() {
     const client = new TorClient();
 
     try {
-        const path = await client.download('https://i1.jbzd.com.pl/contents/2021/11/normal/1PC6LnoPXmKGXbJE5nM2fNqFddaaxi2y.jpg');
+        const path = await client.download('https://i1.jbzd.com.pl/contents/2021/11/normal/1PC6LnoPXmKGXbJE5nM2fNqFddaaxi2y.jpg', {
+            dir: './downloads',
+        });
 
         console.log(path);
     } catch (err) {

@@ -16,7 +16,8 @@ export interface TorRequestOptions {
 }
 
 export interface TorDownloadOptions extends TorRequestOptions {
-    path?: string;
+    filename?: string;
+    dir?: string;
 }
 
 export interface SendOptions {
