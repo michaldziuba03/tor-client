@@ -81,7 +81,8 @@ Download response body to file (implementation based on Node.js Streams and work
 ```ts
 const client = new TorClient();
 const resultPath = await client.download('<any-url.png>', {
-  path: './myfile.png',
+  filename: 'myfile.png',
+  dir: './downloads' // folder must exists!
 });
 
 console.log(resultPath); // string
