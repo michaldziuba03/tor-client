@@ -3,11 +3,11 @@
 </p>
 
 # Node.js Tor client
-##### Node.js TOR client written in TypeScript; It is based on Node.js `http` module and my implementation of SOCKS5 client.
+#### Node.js TOR client written in TypeScript; It is based on Node.js `http(s)` module and my implementation of SOCKS5 client.
 
 ### Features
 - Simple codebase;
-- Same `User-Agent` as in Tor Browser;
+- Same `User-Agent` as in Tor Browser by default;
 - Written in TypeScript;
 
 ### Installation
@@ -16,14 +16,14 @@ Install npm package
 $ npm install @mich4l/tor-client
 ```
 
-#### Install Tor (Linux)
-##### Arch/Manjaro/Garuda
+#### Install Tor
+##### Arch/Manjaro/Garuda (Linux)
 ```bash
 $ sudo pacman -S tor
 $ sudo systemctl enable tor.service
 $ sudo systemctl start tor.service
 ```
-##### Debian/Ubuntu/Mint
+##### Debian/Ubuntu/Mint (Linux)
 ```bash
 $ sudo apt install tor
 ```
@@ -77,7 +77,7 @@ console.log(result.data); // HTML -> string
 ```
 
 #### Passing options for requests
-You can overwrite headers.
+You can pass you custom headers.
 ```ts
 const client = new TorClient();
 const result = await client.get('https://www.deviceinfo.me/', {
@@ -89,4 +89,4 @@ const result = await client.get('https://www.deviceinfo.me/', {
 console.log(result.data);
 ```
 
-By default TorClient uses `User-Agent`: `Mozilla/5.0 (Windows NT 10.0; rv:78.0) Gecko/20100101 Firefox/78.0` (from Tor Browser - most popular Tor client).
+By default TorClient uses User-Agent: `Mozilla/5.0 (Windows NT 10.0; rv:78.0) Gecko/20100101 Firefox/78.0` (from Tor Browser - most popular Tor client).
