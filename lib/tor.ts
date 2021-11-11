@@ -19,7 +19,6 @@ function createAgent(protocol: string, socket: Socket) {
     return new HttpsAgent({ socksSocket: tlsSocket });
 }
 
-
 export class TorClient {
     private readonly http = new HttpClient();
     private readonly options: TorClientOptions;

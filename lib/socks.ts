@@ -38,7 +38,6 @@ export class Socks {
                 this.request(host, port, resolve, reject);
             });
 
-            this.socket.once('error', (err) => reject(err));
             this.socket.write(Buffer.from(request));
         })
         
