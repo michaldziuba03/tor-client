@@ -47,7 +47,7 @@ export class Socks {
     private request(host: string, port: number, resolve: any, reject: any) {
         const cmd = 0x01; // TCP/IP stream connection;
         const reserved = 0x00; // reserved byte;
-        const parsedHost = parseHostname(host);
+        const parsedHost = parseHostname(host); // parsed host type, host length and host value
         const request = [socksVersion, cmd, reserved, ...parsedHost];
 
         request.length += 2;
