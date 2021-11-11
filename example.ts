@@ -6,7 +6,7 @@ async function example() {
     try {
         const result = await client.get('https://raw.githubusercontent.com/mich4ld/ublock-filter/main/filter.txt');
 
-        console.log(result);
+        console.log(result.status);
     } catch (err) {
         console.log(err);
     }
