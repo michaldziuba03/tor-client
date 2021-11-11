@@ -1,11 +1,11 @@
 {
   "name": "@mich4l/tor-client",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Node.js Tor client",
   "main": "dist/index.js",
-  "directories": {
-    "dist": "dist"
-  },
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "test": "jest",
     "build": "tsc"
