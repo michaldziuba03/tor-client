@@ -20,16 +20,12 @@ function createAgent(protocol: string, socket: Socket) {
     return new HttpsAgent({ socksSocket: tlsSocket });
 }
 
-const defaultOptions: TorClientOptions = {
-    socksHost: 'localhost',
-    socksPort: 9050,
-}
 
 export class TorClient {
     private readonly http = new HttpClient();
     private readonly options: TorClientOptions;
 
-    constructor(options: TorClientOptions = defaultOptions) {
+    constructor(options: TorClientOptions = {}) {
         this.options = options;
     }
 
@@ -44,10 +40,13 @@ export class TorClient {
     }
 
     private connectSocks(host: string, port: number) {
-        const socks = new Socks(
-            this.options.socksHost as string, 
-            this.options.socksPort as number
-        );
+        const socksOptions = {
+            socksHost: this.options.socksHost || 'localhost',
+            socksPort: this.options.socksPort || 9050,
+            socksUsername: this.options.socksUsername,
+            socksPassword: this.options.socksPassword,
+        }
+        const socks = new Socks(socksOptions);
 
         return socks.connect(host, port);
     }

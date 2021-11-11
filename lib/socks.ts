@@ -1,14 +1,17 @@
 import net, { Socket, isIP } from 'net';
 import { getSocksError } from './constants';
+import { SocksOptions } from './types';
 
 const socksVersion = 0x05;
 const authMethods = 0x01;
-const authMethod = 0x00;
+const noPassMethod = 0x00;
 
 export class Socks {
     readonly socket: Socket;
 
-    constructor(socksHost: string, socksPort: number) {
+    constructor(options: SocksOptions) {
+        const { socksHost, socksPort } = options;
+
         this.socket = net.connect({
             host: socksHost,
             port: socksPort,
@@ -16,7 +19,7 @@ export class Socks {
     }
 
     connect(host: string, port: number) {
-        const authRequest = [socksVersion, authMethods, authMethod];
+        const request = [socksVersion, authMethods, noPassMethod];
 
         return new Promise<Socket>((resolve, reject) => {
             this.socket.once('data', chunk => {
@@ -28,16 +31,15 @@ export class Socks {
                     throw new Error('Invalid SOCKS version in response');
                 }
     
-                if (chunk[1] !== authMethod) {
+                if (chunk[1] !== noPassMethod) {
                     throw new Error('Unexpected SOCKS authentication method');
                 }
-    
+                
                 this.request(host, port, resolve, reject);
             });
 
-            this.socket.on('error', (err) => reject(err));
-    
-            this.socket.write(Buffer.from(authRequest));
+            this.socket.once('error', (err) => reject(err));
+            this.socket.write(Buffer.from(request));
         })
         
     }
@@ -45,9 +47,8 @@ export class Socks {
     private request(host: string, port: number, resolve: any, reject: any) {
         const cmd = 0x01; // TCP/IP stream connection;
         const reserved = 0x00; // reserved byte;
-        const parsedHost = parseHost(host);
-        const request = [socksVersion, cmd, reserved, parsedHost];
-        parseDomainName(host, request);
+        const parsedHost = parseHostname(host);
+        const request = [socksVersion, cmd, reserved, ...parsedHost];
 
         request.length += 2;
         const buffer = Buffer.from(request);
@@ -74,26 +75,16 @@ export class Socks {
     }
 }
 
-function parseHost(host: string) {
+function parseHostname(host: string) {
+    const buffer = Buffer.from(host)
+    const len = buffer.length;
     const type = isIP(host);
-
-    switch (type) {
-        case 0:;
-            return 0x03;
-        case 4:
-            return 0x01;
-        case 6:
-            return 0x04;
-        default:
-            throw Error('Invalid destination host');
+    if (type !== 0) {
+        throw new Error('IP hostname is not supported yet');
     }
-}
 
-function parseDomainName(host: string, request: number[]) {
-    var buffer = Buffer.from(host), l = buffer.length;
-	request.push(l);
+    const parsedHostname = buffer.toJSON().data
+    const request = [0x03, len, ...parsedHostname];
 
-	for (let i = 0; i < l; i++) {
-		request.push(buffer[i]);
-	}
+    return request;
 }

@@ -3,7 +3,7 @@ import https from 'https';
 import { ALLOWED_PROTOCOLS, headers, HttpMethod, MimeTypes } from './constants';
 import { formParser } from './parsers';
 import { HttpResponse, SendOptions, SocksAgent, IRequestOptions, TorRequestOptions } from './types';
-import { buildResponse, generateFilename } from './utils';
+import { buildResponse } from './utils';
 import { createWriteStream } from 'fs';
 
 export class HttpClient {
