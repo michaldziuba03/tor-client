@@ -39,10 +39,8 @@ export class TorClient {
 
     private connectSocks(host: string, port: number) {
         const socksOptions = {
-            socksHost: this.options.socksHost || 'localhost',
+            socksHost: this.options.socksHost || '127.0.0.1',
             socksPort: this.options.socksPort || 9050,
-            socksUsername: this.options.socksUsername,
-            socksPassword: this.options.socksPassword,
         }
         const socks = new Socks(socksOptions);
 

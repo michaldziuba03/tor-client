@@ -35,8 +35,6 @@ export interface HttpResponse {
 export interface TorClientOptions {
     socksHost?: string;
     socksPort?: number;
-    socksUsername?: string;
-    socksPassword?: string;
 }
 
 export type SocksAgent =  HttpAgent | HttpsAgent;
