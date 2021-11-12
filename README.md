@@ -3,7 +3,7 @@
 </p>
 
 # Node.js Tor client
-#### Node.js TOR client written in TypeScript; It is based on Node.js `http(s)` module and my implementation of SOCKS5 client.
+#### Node.js TOR client written in TypeScript; It is based on Node.js `http(s)` module and my implementation of SOCKS5 client. Tested on Linux Mint and Manjaro with Node.js v16-17.
 
 ### Features
 - Simple codebase;

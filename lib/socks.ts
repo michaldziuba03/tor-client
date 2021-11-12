@@ -24,6 +24,7 @@ export class Socks {
 
     auth() {
         const request = [socksVersion, authMethods, noPassMethod];
+        const buffer = Buffer.from(request);
 
         return new Promise<boolean>((resolve, reject) => {
             this.socket.once('data', chunk => {
@@ -45,7 +46,7 @@ export class Socks {
                 resolve(true);
             });
 
-            this.socket.write(Buffer.from(request));
+            this.socket.write(buffer);
         });
     }
 
@@ -94,7 +95,7 @@ function parseHost(host: string) {
     }
 
     const parsedHostname = buffer.toJSON().data
-    const request = [0x03, len, ...parsedHostname];
+    const request = [0x03, len, ...parsedHostname];  // 0x03 -> hostname type (domain instead ipv4 or ipv6)
 
     return request;
 }
