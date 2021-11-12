@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://user-images.githubusercontent.com/43048524/141314219-958dc2f1-ebbe-4d51-8adb-931a8e72a48c.png" width="180" alt="Nest Redis Logo" />
+  <img src="https://user-images.githubusercontent.com/43048524/141314219-958dc2f1-ebbe-4d51-8adb-931a8e72a48c.png" width="180" alt="mich4ld Tor client Logo" />
 </p>
 
 # Node.js Tor client
