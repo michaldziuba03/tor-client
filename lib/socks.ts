@@ -94,8 +94,9 @@ function parseHost(host: string) {
         throw new Error('IP hostname is not supported yet');
     }
 
-    const parsedHostname = buffer.toJSON().data
-    const request = [0x03, len, ...parsedHostname];  // 0x03 -> hostname type (domain instead ipv4 or ipv6)
+    const hostType = 0x03; //  hostname type (0x03 - domain instead ipv4 or ipv6)
+    const parsedHostname = buffer.toJSON().data;
+    const request = [hostType, len, ...parsedHostname]; 
 
     return request;
 }
