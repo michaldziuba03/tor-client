@@ -33,3 +33,11 @@ export function getPath(options: TorDownloadOptions, pathname: string) {
         filename
     );
 }
+
+export function dnsLeakDefender(
+    hostname: string, 
+    options: any, 
+    cb: any,
+ ) {
+    throw new Error(`Blocked DNS lookup for: ${hostname}`);
+}

@@ -1,13 +1,9 @@
 import { Socket } from "net";
 import { TLSSocket } from 'tls';
 import { HttpAgent, HttpsAgent } from "./agent";
-import { headers, HttpMethod } from "./constants";
 import { HttpClient } from "./http";
 import { Socks } from "./socks";
 import { TorClientOptions, TorDownloadOptions, TorRequestOptions } from "./types";
-
-import * as https from 'https';
-import * as http from 'http';
 import { getPath } from "./utils";
 
 function createAgent(protocol: string, socket: Socket) {
@@ -53,34 +49,39 @@ export class TorClient {
         const path = getPath(options, pathname);
         const socket = await this.connectSocks(host, port);
         const agent = createAgent(protocol, socket);
-        const client = protocol === 'http:' ? http : https;
 
-        return this.http.download({
-            url,
-            client,
-            requestOptions: { 
-                method: HttpMethod.GET, 
-                headers: { ...headers, ...options.headers },
-            },
-        }, agent, path);
+        return this.http.download(url, {
+            path,
+            agent,
+            headers: options.headers,
+            timeout: options.timeout,
+        });
     }
 
-    async get(url: string, options?: TorRequestOptions) {
+    async get(url: string, options: TorRequestOptions = {}) {
         const { protocol, host, port } = this.getDestination(url);
 
         const socket = await this.connectSocks(host, port);
         const agent = createAgent(protocol, socket);
 
-        return this.http.get(url, agent, options);
+        return this.http.get(url, {
+            agent,
+            headers: options.headers,
+            timeout: options.timeout,
+        });
     }
 
-    async post(url: string, data: object, options?: TorRequestOptions) {
+    async post(url: string, data: object, options: TorRequestOptions = {}) {
         const { protocol, host, port } = this.getDestination(url);
 
         const socket = await this.connectSocks(host, port);
         const agent = createAgent(protocol, socket);
-
-        return this.http.post(url, data, agent, options);
+        
+        return this.http.post(url, data, {
+            agent,
+            headers: options.headers,
+            timeout: options.timeout,
+        });
     }
 
     async torcheck(options?: TorRequestOptions) {

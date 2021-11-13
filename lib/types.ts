@@ -1,18 +1,9 @@
 import { IncomingHttpHeaders } from "http";
-import { HttpMethod } from "./constants";
 import { HttpAgent, HttpsAgent } from "./agent";
-
-import * as http from 'http';
-import * as https from 'https';
-
-export interface IRequestOptions {
-    method: HttpMethod;
-    data?: any;
-    headers: { [x: string]: string } | {};
-}
 
 export interface TorRequestOptions {
     headers?: object;
+    timeout?: number;
 }
 
 export interface TorDownloadOptions extends TorRequestOptions {
@@ -20,10 +11,9 @@ export interface TorDownloadOptions extends TorRequestOptions {
     dir?: string;
 }
 
-export interface SendOptions {
-    url: string;
-    requestOptions: IRequestOptions;
-    client: typeof http | typeof https;
+export interface TorClientOptions {
+    socksHost?: string;
+    socksPort?: number;
 }
 
 export interface HttpResponse {
@@ -32,9 +22,16 @@ export interface HttpResponse {
     data: string;
 }
 
-export interface TorClientOptions {
-    socksHost?: string;
-    socksPort?: number;
+export interface HttpOptions {
+    headers?: object;
+    method?: string;
+    data?: string;
+    agent?: SocksAgent;
+    timeout?: number;
+}
+
+export interface DownloadOptions extends HttpOptions {
+    path: string;
 }
 
 export type SocksAgent =  HttpAgent | HttpsAgent;
