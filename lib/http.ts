@@ -21,6 +21,10 @@ export class HttpClient {
             throw new Error('Invalid HTTP protocol in url');
         }
 
+        if (!options.agent) {
+            throw new Error('HttpAgent is required for TOR requests');
+        }
+
         const client = this.getClient(protocol);
         const requestOptions: RequestOptions = {
             headers: { ...headers, ...options.headers },

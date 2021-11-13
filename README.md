@@ -50,6 +50,15 @@ const client = new TorClient({
 ```
 By default client connects with `localhost:9050`.
 
+#### Request options
+By default request hasn't any timeout.
+```ts
+{
+  headers: object,
+  timeout: number,
+}
+```
+
 #### `.torcheck(options?)`
 Ping `https://check.torproject.org/` to check Tor connection status.
 ```ts
@@ -89,13 +98,14 @@ console.log(resultPath); // string
 ```
 
 #### Passing options for requests
-You can pass you custom headers.
+You can pass your custom headers and request timeout.
 ```ts
 const client = new TorClient();
 const result = await client.get('https://www.deviceinfo.me/', {
-    headers: {
-      'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.69 Safari/537.36',
-  }
+  headers: {
+    'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.69 Safari/537.36',
+  },
+  timeout: 20000,
 });
 
 console.log(result.data);
