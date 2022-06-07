@@ -1,7 +1,3 @@
-<p align="center">
-  <img src="https://user-images.githubusercontent.com/43048524/141314219-958dc2f1-ebbe-4d51-8adb-931a8e72a48c.png" width="180" alt="mich4ld Tor client Logo" />
-</p>
-
 # Node.js Tor client
 #### Node.js TOR client written in TypeScript; It is based on Node.js `http(s)` module and my implementation of SOCKS5 client. Tested on Linux Mint and Manjaro with Node.js v16-17.
 
