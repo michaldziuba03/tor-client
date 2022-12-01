@@ -1,16 +1,12 @@
 # Node.js Tor client
 #### Node.js TOR client written in TypeScript; It is based on Node.js `http(s)` module and my implementation of SOCKS5 client. Tested on Linux Mint and Manjaro with Node.js v16-17.
 
+## Project will be activated again soon...
+
 ### Features
 - Simple codebase;
 - Same `User-Agent` as in Tor Browser by default;
 - Written in TypeScript;
-
-### Installation
-Install npm package
-```bash
-$ npm install @mich4l/tor-client
-```
 
 #### Install Tor
 ##### Arch/Manjaro/Garuda (Linux)
