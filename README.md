@@ -1,5 +1,5 @@
 # Node.js Tor client
-#### Node.js TOR client written in TypeScript; It is based on Node.js `http(s)` module and my implementation of SOCKS5 client. Tested on Linux Mint and Manjaro with Node.js v16-17.
+Node.js TOR client written in TypeScript; It is based on Node.js `http(s)` module and my implementation of SOCKS5 client. Tested on Linux Mint and Manjaro with Node.js v16-17.
 
 ### Features
 - Simple codebase;
@@ -41,7 +41,7 @@ const client = new TorClient({
 By default client connects with `localhost:9050`.
 
 #### Request options
-By default request hasn't any timeout.
+By default request does **not** have any timeout.
 ```ts
 {
   headers: object,
