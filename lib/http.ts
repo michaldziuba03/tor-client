@@ -100,7 +100,7 @@ export class HttpClient {
     }
 
     post(url: string, data: object, options: HttpOptions = {}) {
-        const dataString = formParser(data);
+        const dataString = formParser(data as Record<string, string>);
         return this.request(url, { 
             agent: options.agent,
             timeout: options.timeout,

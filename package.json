@@ -1,7 +1,7 @@
 {
-  "name": "@mich4l/tor-client",
-  "version": "1.0.4",
-  "description": "Node.js Tor client",
+  "name": "@md03/tor",
+  "version": "1.0.0",
+  "description": "Node.js Tor client without dependencies",
   "main": "dist/index.js",
   "files": [
     "dist"
@@ -12,31 +12,30 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/mich4ld/tor-client.git"
+    "url": "git+https://github.com/michaldziuba03/tor-client.git"
   },
   "keywords": [
     "tor",
     "tor-client",
     "proxy",
     "http",
-    "socks"
+    "socks",
+    "socks5",
+    "socket",
+    "networking"
   ],
-  "author": "mich4ld",
+  "author": "michaldziuba03",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/mich4ld/tor-client/issues"
+    "url": "https://github.com/michaldziuba03/tor-client/issues"
   },
-  "homepage": "https://github.com/mich4ld/tor-client#readme",
+  "homepage": "https://github.com/michaldziuba03/tor-client#readme",
   "devDependencies": {
-    "@types/jest": "^27.0.2",
-    "@types/node": "^16.11.6",
-    "@types/qs": "^6.9.7",
-    "jest": "^27.3.1",
-    "ts-jest": "^27.0.7",
-    "typescript": "^4.4.4"
-  },
-  "dependencies": {
-    "qs": "^6.10.1"
+    "@types/jest": "^27.5.2",
+    "@types/node": "^16.18.101",
+    "jest": "^27.5.1",
+    "ts-jest": "^27.1.5",
+    "typescript": "^4.9.5"
   },
   "jest": {
     "preset": "ts-jest",

@@ -1,6 +1,6 @@
-import qs from 'qs';
+import qs from 'querystring';
 
-export function formParser(data: object) {
+export function formParser(data: Record<string, string>) {
     return qs.stringify(data);
 }
 
