@@ -7,6 +7,7 @@
     "dist"
   ],
   "scripts": {
+    "prepare": "husky",
     "test": "jest",
     "build": "tsc"
   },
@@ -31,8 +32,11 @@
   },
   "homepage": "https://github.com/michaldziuba03/tor-client#readme",
   "devDependencies": {
+    "@commitlint/cli": "^19.3.0",
+    "@commitlint/config-conventional": "^19.2.2",
     "@types/jest": "^27.5.2",
     "@types/node": "^16.18.101",
+    "husky": "^9.0.11",
     "jest": "^27.5.1",
     "ts-jest": "^27.1.5",
     "typescript": "^4.9.5"
@@ -40,5 +44,10 @@
   "jest": {
     "preset": "ts-jest",
     "testTimeout": 60000
+  },
+  "commitlint": {
+    "extends": [
+      "@commitlint/config-conventional"
+    ]
   }
 }
