@@ -7,7 +7,7 @@ import { ALLOWED_PROTOCOLS } from './constants';
 import { DownloadOptions, HttpOptions, HttpResponse } from './types';
 import { headers, HttpMethod, MimeTypes } from './constants';
 import { buildResponse, preventDNSLookup } from './utils';
-
+import { TorHttpException } from './exceptions';
 
 export class HttpClient {
     private getClient(protocol: string) {
@@ -19,11 +19,11 @@ export class HttpClient {
     private createRequestOptions(url: string, options: HttpOptions) {
         const { protocol } = new URL(url);
         if (!ALLOWED_PROTOCOLS.includes(protocol)) {
-            throw new Error('Invalid HTTP protocol in url');
+            throw new TorHttpException('Invalid HTTP protocol in url');
         }
 
         if (!options.agent) {
-            throw new Error('HttpAgent is required for TOR requests');
+            throw new TorHttpException('HttpAgent is required for TOR requests');
         }
 
         const client = this.getClient(protocol);
@@ -56,7 +56,7 @@ export class HttpClient {
             if (options.timeout) req.setTimeout(options.timeout);
 
             req.on('error', reject);
-            req.on('timeout', () => reject(new Error('Http request timeout')));
+            req.on('timeout', () => reject(new TorHttpException('Http request timeout')));
 
             if (options.data) {
                 req.write(options.data);
@@ -88,7 +88,7 @@ export class HttpClient {
 
             if (options.timeout) req.setTimeout(options.timeout);
             req.on('error', reject);
-            req.on('timeout', () => reject(new Error('Download timeout')));
+            req.on('timeout', () => reject(new TorHttpException('Download timeout')));
             req.end();
         });
     }

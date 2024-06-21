@@ -36,8 +36,8 @@ export function getPath(options: TorDownloadOptions, pathname: string) {
 
 export function preventDNSLookup(
     hostname: string, 
-    options: any, 
-    cb: any,
+    _options: any, 
+    _cb: any,
  ) {
     throw new Error(`Blocked DNS lookup for: ${hostname}`);
 }

@@ -16,10 +16,10 @@ export interface TorClientOptions {
     socksPort?: number;
 }
 
-export interface HttpResponse {
+export interface HttpResponse<TResponseData = string> {
     status: number;
     headers: IncomingHttpHeaders;
-    data: string;
+    data: TResponseData;
 }
 
 export interface HttpOptions {

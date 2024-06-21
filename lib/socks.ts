@@ -1,5 +1,6 @@
 import net, { Socket, isIP } from 'net';
 import { SocksOptions } from './types';
+import { TorException } from './exceptions';
 
 const socksVersion = 0x05; // SOCKS v5
 const authMethods = 0x01; // NUMBER OF SUPPORTED AUTH METHODS
@@ -29,17 +30,17 @@ export class Socks {
         return new Promise<boolean>((resolve, reject) => {
             this.socket.once('data', chunk => {
                 if (chunk.length !== 2) {
-                    const err = new Error('Invalid SOCKS response size');
+                    const err = new TorException('Invalid SOCKS response size');
                     return reject(err);
                 }
     
                 if (chunk[0] !== socksVersion) {
-                    const err = new Error('Invalid SOCKS version in response');
+                    const err = new TorException('Invalid SOCKS version in response');
                     return reject(err);
                 }
     
                 if (chunk[1] !== noPassMethod) {
-                    const err = new Error('Unexpected SOCKS authentication method');
+                    const err = new TorException('Unexpected SOCKS authentication method');
                     return reject(err);
                 }
                 
@@ -63,18 +64,18 @@ export class Socks {
         return new Promise<Socket>((resolve, reject) => {
             this.socket.once('data', chunk => {
                 if (chunk[0] !== socksVersion) {
-                    const err =  new Error('Invalid SOCKS version in response');
+                    const err =  new TorException('Invalid SOCKS version in response');
                     return reject(err);
                 }
     
                 if (chunk[1] !== 0x00) {
                     const errorMessage = getSocksError(chunk[1]);
-                    const err = new Error(errorMessage);
+                    const err = new TorException(errorMessage);
                     return reject(err);
                 }
     
                 if (chunk[2] !== reserved) {
-                    const err = new Error('Invalid SOCKS response shape');
+                    const err = new TorException('Invalid SOCKS response shape');
                     return reject(err);
                 }
     
@@ -91,7 +92,7 @@ function parseHost(host: string) {
     const len = buffer.length;
     const type = isIP(host);
     if (type !== 0) {
-        throw new Error('IP hostname is not supported yet');
+        throw new TorException('IP hostname is not supported yet');
     }
 
     const hostType = 0x03; //  hostname type (0x03 - domain instead ipv4 or ipv6)
