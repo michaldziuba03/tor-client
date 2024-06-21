@@ -1,11 +1,12 @@
 import { createWriteStream } from 'fs';
 import http from 'http';
 import https, { RequestOptions } from 'https';
+import qs from 'querystring';
+
 import { ALLOWED_PROTOCOLS } from './constants';
 import { DownloadOptions, HttpOptions, HttpResponse } from './types';
 import { headers, HttpMethod, MimeTypes } from './constants';
-import { formParser } from './parsers';
-import { buildResponse, dnsLeakDefender } from './utils';
+import { buildResponse, preventDNSLookup } from './utils';
 
 
 export class HttpClient {
@@ -30,7 +31,7 @@ export class HttpClient {
             headers: { ...headers, ...options.headers },
             method: options.method,
             agent: options.agent,
-            lookup: dnsLeakDefender,
+            lookup: preventDNSLookup,
         }
 
         return { client, requestOptions }
@@ -100,7 +101,7 @@ export class HttpClient {
     }
 
     post(url: string, data: object, options: HttpOptions = {}) {
-        const dataString = formParser(data as Record<string, string>);
+        const dataString = qs.stringify(data as Record<string, string>);
         return this.request(url, { 
             agent: options.agent,
             timeout: options.timeout,
