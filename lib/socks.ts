@@ -28,19 +28,22 @@ export class Socks {
         });
 
         return new Promise<Socks>((resolve, reject) => {
-            socket.once('error', (err: Error) => {
+            const onError = (err: Error) => {
                 socket.destroy(); // safe to call many times
                 reject(err);
-            });
+            }
 
-            socket.once('timeout', () => {
+            const onTimeout = () => {
                 const err = new Error('SOCKS5 connection attempt timed out');
                 socket.destroy(err); // will notify error listener to reject
-            });
-    
+            }
+            
+            socket.once('error', onError);
+            socket.once('timeout', onTimeout);
             socket.once('connect', () => {
                 socket.setTimeout(0);
-                socket.removeAllListeners();
+                socket.removeListener('error', onError);
+                socket.removeListener('timeout', onTimeout);
                 resolve(new Socks(socket));
             });
         });
