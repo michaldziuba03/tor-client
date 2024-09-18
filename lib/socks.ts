@@ -13,16 +13,35 @@ const noPassMethod = 0x00; // PREFERED AUTH METHOD BY DEFAULT (no password)
  * Handles SOCKS5 protocol
  */
 export class Socks {
-    readonly socket: Socket;
+    constructor(public readonly socket: Socket) {}
 
-    constructor(options: SocksOptions) {
-        const { socksHost, socksPort } = options;
-
-        // TODO: wtf, make class accepting Socket as an argument
-        this.socket = net.connect({
-            host: socksHost,
-            port: socksPort,
+     /**
+     * Connect to the SOCKS5 proxy server.
+     * @throws {Error} on connection failure
+     */
+    static connect(options: SocksOptions): Promise<Socks> {
+        const socket = net.connect({
+            host: options.socksHost,
+            port: options.socksPort,
+            keepAlive: options.keepAlive,
+            timeout: options.timeout,
         });
+
+        return new Promise<Socks>((resolve, reject) => {
+            socket.on('error', (err: Error) => {
+                reject(err);
+            });
+
+            socket.on('timeout', () => {
+                const err = new Error('SOCKS5 connection attempt timed out');
+                socket.destroy(err);
+            });
+    
+            socket.on('connect', () => {
+                socket.setTimeout(0);
+                resolve(new Socks(socket));
+            })
+        })
     }
 
     /**
@@ -38,7 +57,7 @@ export class Socks {
     }
 
     /**
-     * Perform `initial greeting` to the SOCKS5 proxy server. Throws exception on failure.
+     * Perform `initial greeting` to the SOCKS5 proxy server.
      * 
      * @throws {TorException} on connection failure
      */
@@ -49,7 +68,7 @@ export class Socks {
         return new Promise<boolean>((resolve, reject) => {
             this.socket.once('data', chunk => {
                 if (chunk.length !== 2) {
-                    const err = new TorException('Invalid SOCKS response size');
+                    const err = new TorException('Unexpected SOCKS response size');
                     return reject(err);
                 }
     

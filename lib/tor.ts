@@ -34,12 +34,12 @@ export class TorClient {
         return { port, host: urlObj.host, protocol: urlObj.protocol, pathname: urlObj.pathname }
     }
 
-    private connectSocks(host: string, port: number) {
+    private async connectSocks(host: string, port: number) {
         const socksOptions = {
             socksHost: this.options.socksHost || '127.0.0.1',
             socksPort: this.options.socksPort || 9050,
         }
-        const socks = new Socks(socksOptions);
+        const socks = await Socks.connect(socksOptions);
 
         return socks.proxy(host, port);
     }
