@@ -1,14 +1,29 @@
-# Node.js Tor client
+<div align="center">
+  <img alt="logo" src="https://github.com/user-attachments/assets/0825ceb7-837a-4aa4-a34e-4e29b6cf66d4">
+</div>
 
-Tested on Node.js v18+ (maybe works on older versions as well).
+<h1 align="center">
+  Node.js Tor client
+</h1>
 
-### Features
-- Simple codebase;
-- Same `User-Agent` as in Tor Browser by default;
-- Written in TypeScript;
+<p align="center">
+  A simple library for making HTTP requests over the Tor network programmatically in JavaScript.
+</p>
 
-#### Install Tor
-##### Arch/Manjaro/Garuda (Linux)
+## 🧅 Features
+
+- [x] Simple codebase
+- [x] Own implementation of SOCKS5 protocol
+- [x] Built-in HTTP wrapper (but still possible to use with `axios`) 
+- [x] Same `User-Agent` as in Tor Browser by default
+- [x] Written in TypeScript
+- [x] No external dependencies 
+
+### Install Tor
+
+This library expects Tor proxy server to be available locally on port `9050` (by default).
+
+#### Arch/Manjaro/Garuda (Linux)
 ```bash
 $ sudo pacman -S tor
 $ sudo systemctl enable tor.service
@@ -102,4 +117,8 @@ const result = await client.get('https://www.deviceinfo.me/', {
 console.log(result.data);
 ```
 
-By default TorClient uses User-Agent: `Mozilla/5.0 (Windows NT 10.0; rv:78.0) Gecko/20100101 Firefox/78.0` (from Tor Browser - most popular Tor client).
+By default TorClient uses User-Agent: `Mozilla/5.0 (Windows NT 10.0; rv:109.0) Gecko/20100101 Firefox/115.0` (from Tor Browser - most popular Tor client).
+
+## License
+
+Distributed under the MIT License. See `LICENSE` for more information.
