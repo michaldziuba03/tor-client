@@ -28,20 +28,22 @@ export class Socks {
         });
 
         return new Promise<Socks>((resolve, reject) => {
-            socket.on('error', (err: Error) => {
+            socket.once('error', (err: Error) => {
+                socket.destroy(); // safe to call many times
                 reject(err);
             });
 
-            socket.on('timeout', () => {
+            socket.once('timeout', () => {
                 const err = new Error('SOCKS5 connection attempt timed out');
-                socket.destroy(err);
+                socket.destroy(err); // will notify error listener to reject
             });
     
-            socket.on('connect', () => {
+            socket.once('connect', () => {
                 socket.setTimeout(0);
+                socket.removeAllListeners();
                 resolve(new Socks(socket));
-            })
-        })
+            });
+        });
     }
 
     /**
@@ -52,7 +54,7 @@ export class Socks {
      * @throws {TorException} on connection failure
      */
     async proxy(host: string, port: number) {
-        await this.auth();
+        await this.initialize();
         return this.request(host, port);
     }
 
@@ -61,7 +63,7 @@ export class Socks {
      * 
      * @throws {TorException} on connection failure
      */
-    auth() {
+    initialize() {
         const request = [socksVersion, authMethods, noPassMethod];
         const buffer = Buffer.from(request);
 
