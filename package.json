@@ -9,7 +9,8 @@
   "scripts": {
     "prepare": "husky",
     "test": "jest",
-    "build": "rimraf dist && tsc"
+    "build": "rimraf dist && tsc",
+    "sample": "node ./tests/example.js"
   },
   "repository": {
     "type": "git",

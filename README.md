@@ -19,6 +19,17 @@
 - [x] Written in TypeScript
 - [x] No external dependencies 
 
+## Installation
+
+Install package with package manager.
+
+```sh
+# npm:
+npm install --save @md03/tor
+# pnpm:
+pnpm add @md03/tor
+```
+
 ### Install Tor
 
 This library expects Tor proxy server to be available locally on port `9050` (by default).

@@ -1,6 +1,9 @@
 export enum HttpMethod {
     POST = 'POST',
-    GET = 'GET'
+    GET = 'GET',
+    DELETE = 'DELETE',
+    PUT = 'PUT',
+    PATCH = 'PATCH',
 }
 
 export const ALLOWED_PROTOCOLS = ['http:', 'https:'];

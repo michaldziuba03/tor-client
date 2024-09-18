@@ -9,6 +9,9 @@ import { headers, HttpMethod, MimeTypes } from './constants';
 import { buildResponse, preventDNSLookup } from './utils';
 import { TorHttpException } from './exceptions';
 
+/**
+ * Wrapper around `http` module for making HTTP requests over Tor.
+ */
 export class HttpClient {
     private getClient(protocol: string) {
         if (protocol === 'http:') return http;
@@ -93,6 +96,13 @@ export class HttpClient {
         });
     }
 
+    delete(url: string, options: HttpOptions = {}) {
+        return this.request(url, {
+            ...options,
+            method: HttpMethod.DELETE,
+        });
+    }
+
     get(url: string, options: HttpOptions = {}) {
         return this.request(url, {
             ...options,
@@ -106,6 +116,36 @@ export class HttpClient {
             agent: options.agent,
             timeout: options.timeout,
             method: HttpMethod.POST, 
+            data: dataString,
+            headers: {
+                'Content-Type': MimeTypes.FORM,
+                'Content-Length': dataString.length,
+                ...options.headers,
+            },
+        });
+    }
+
+    put(url: string, data: object, options: HttpOptions = {}) {
+        const dataString = qs.stringify(data as Record<string, string>);
+        return this.request(url, { 
+            agent: options.agent,
+            timeout: options.timeout,
+            method: HttpMethod.PUT, 
+            data: dataString,
+            headers: {
+                'Content-Type': MimeTypes.FORM,
+                'Content-Length': dataString.length,
+                ...options.headers,
+            },
+        });
+    }
+
+    patch(url: string, data: object, options: HttpOptions = {}) {
+        const dataString = qs.stringify(data as Record<string, string>);
+        return this.request(url, { 
+            agent: options.agent,
+            timeout: options.timeout,
+            method: HttpMethod.PATCH, 
             data: dataString,
             headers: {
                 'Content-Type': MimeTypes.FORM,
