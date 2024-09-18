@@ -19,7 +19,7 @@ export class HttpClient {
     private createRequestOptions(url: string, options: HttpOptions) {
         const { protocol } = new URL(url);
         if (!ALLOWED_PROTOCOLS.includes(protocol)) {
-            throw new TorHttpException('Invalid HTTP protocol in url');
+            throw new TorHttpException('Invalid HTTP protocol in URL');
         }
 
         if (!options.agent) {

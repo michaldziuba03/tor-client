@@ -54,7 +54,7 @@ export class Socks {
     request(host: string, port: number) {
         const cmd = 0x01; // TCP/IP stream connection;
         const reserved = 0x00; // reserved byte;
-        const parsedHost = parseHost(host); // parsed host type, host length and host value
+        const parsedHost = this.parseHost(host); // parsed host type, host length and host value
         const request = [socksVersion, cmd, reserved, ...parsedHost];
 
         request.length += 2;
@@ -63,19 +63,22 @@ export class Socks {
 
         return new Promise<Socket>((resolve, reject) => {
             this.socket.once('data', chunk => {
+                let err;
+
                 if (chunk[0] !== socksVersion) {
-                    const err =  new TorException('Invalid SOCKS version in response');
-                    return reject(err);
+                    err =  new TorException('Invalid SOCKS version in response');
                 }
-    
-                if (chunk[1] !== 0x00) {
+                else if (chunk[1] !== 0x00) {
                     const errorMessage = getSocksError(chunk[1]);
-                    const err = new TorException(errorMessage);
-                    return reject(err);
+                    err = new TorException(errorMessage);
+                    
                 }
-    
-                if (chunk[2] !== reserved) {
-                    const err = new TorException('Invalid SOCKS response shape');
+                else if (chunk[2] !== reserved) {
+                    err = new TorException('Invalid SOCKS response shape');
+                }
+
+                if (err) {
+                    this.socket.destroy(err);
                     return reject(err);
                 }
     
@@ -83,23 +86,27 @@ export class Socks {
             });
     
             this.socket.write(buffer);
-        });   
-    }
-}
-
-function parseHost(host: string) {
-    const buffer = Buffer.from(host)
-    const len = buffer.length;
-    const type = isIP(host);
-    if (type !== 0) {
-        throw new TorException('IP hostname is not supported yet');
+        });
     }
 
-    const hostType = 0x03; //  hostname type (0x03 - domain instead ipv4 or ipv6)
-    const parsedHostname = buffer.toJSON().data;
-    const request = [hostType, len, ...parsedHostname]; 
+    parseHost(host: string) {
+        const type = isIP(host);
 
-    return request;
+        if (type === 4) {
+            const hostType = 0x01;  // 0x01 means IPv4
+            const buffer = Buffer.from(host.split('.').map(octet => parseInt(octet, 10)));
+            return [hostType, ...buffer];
+        } else if (type === 6) {
+            const hostType = 0x04;  // 0x04 means IPv6
+            const buffer = Buffer.from(host.split(':').map(hex => parseInt(hex, 16)));
+            return [hostType, ...buffer];
+        } else {
+            const buffer = Buffer.from(host);
+            const hostType = 0x03;  // 0x03 means domain name
+            const len = buffer.length;
+            return [hostType, len, ...buffer];
+        }
+    }
 }
 
 function getSocksError(status: number) {

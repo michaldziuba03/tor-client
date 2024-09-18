@@ -9,7 +9,7 @@
   "scripts": {
     "prepare": "husky",
     "test": "jest",
-    "build": "tsc"
+    "build": "rimraf dist && tsc"
   },
   "repository": {
     "type": "git",
@@ -32,12 +32,13 @@
   },
   "homepage": "https://github.com/michaldziuba03/tor-client#readme",
   "devDependencies": {
-    "@commitlint/cli": "^19.3.0",
-    "@commitlint/config-conventional": "^19.2.2",
+    "@commitlint/cli": "^19.5.0",
+    "@commitlint/config-conventional": "^19.5.0",
     "@types/jest": "^27.5.2",
-    "@types/node": "^16.18.101",
-    "husky": "^9.0.11",
+    "@types/node": "^16.18.108",
+    "husky": "^9.1.6",
     "jest": "^27.5.1",
+    "rimraf": "^6.0.1",
     "ts-jest": "^27.1.5",
     "typescript": "^4.9.5"
   },
