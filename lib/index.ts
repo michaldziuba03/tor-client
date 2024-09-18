@@ -1,3 +1,3 @@
 export { TorClient } from './tor';
-export { Socks } from './socks';
+export { Socks, SocksOptions } from './socks';
 export { HttpResponse, TorDownloadOptions, TorRequestOptions, TorClientOptions } from './types';

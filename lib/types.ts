@@ -35,10 +35,3 @@ export interface DownloadOptions extends HttpOptions {
 }
 
 export type SocksAgent =  HttpAgent | HttpsAgent;
-
-export interface SocksOptions {
-    socksHost: string;
-    socksPort: number;
-    keepAlive?: boolean | undefined;
-    timeout?: number | undefined;
-}

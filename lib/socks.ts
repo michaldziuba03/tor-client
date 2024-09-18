@@ -1,6 +1,25 @@
+/* Copyright (c) Michał Dziuba
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 import net, { Socket, isIP } from 'net';
-import { SocksOptions } from './types';
-import { TorException } from './exceptions';
 
 const IPv4 = 4;
 const IPv6 = 6;
@@ -8,6 +27,14 @@ const IPv6 = 6;
 const socksVersion = 0x05; // SOCKS v5
 const authMethods = 0x01; // NUMBER OF SUPPORTED AUTH METHODS
 const noPassMethod = 0x00; // PREFERED AUTH METHOD BY DEFAULT (no password)
+
+export interface SocksOptions {
+    socksHost: string;
+    socksPort: number;
+    keepAlive?: boolean | undefined;
+    noDelay?: boolean | undefined;
+    timeout?: number | undefined;
+}
 
 /**
  * Handles SOCKS5 protocol
@@ -24,6 +51,7 @@ export class Socks {
             host: options.socksHost,
             port: options.socksPort,
             keepAlive: options.keepAlive,
+            noDelay: options.noDelay,
             timeout: options.timeout,
         });
 
@@ -54,7 +82,7 @@ export class Socks {
      * 
      * @param {string} host - destination hostname (domain or IP address)
      * @param {number} port - destination port
-     * @throws {TorException} on connection failure
+     * @throws {Error} on connection failure
      */
     async proxy(host: string, port: number) {
         await this.initialize();
@@ -64,7 +92,7 @@ export class Socks {
     /**
      * Perform `initial greeting` to the SOCKS5 proxy server.
      * 
-     * @throws {TorException} on connection failure
+     * @throws {Error} on connection failure
      */
     initialize() {
         const request = [socksVersion, authMethods, noPassMethod];
@@ -72,23 +100,27 @@ export class Socks {
 
         return new Promise<boolean>((resolve, reject) => {
             this.socket.once('data', chunk => {
+                let err;
+
                 if (chunk.length !== 2) {
-                    const err = new TorException('Unexpected SOCKS response size');
-                    return reject(err);
+                    err = new Error('Unexpected SOCKS response size');
                 }
     
                 if (chunk[0] !== socksVersion) {
-                    const err = new TorException('Invalid SOCKS version in response');
-                    return reject(err);
+                    err = new Error('Invalid SOCKS version in response');
                 }
     
                 // TODO: add support for more auth methods
                 if (chunk[1] !== noPassMethod) {
-                    const err = new TorException('Unexpected SOCKS authentication method');
+                    err = new Error('Unexpected SOCKS authentication method');
+                }
+
+                if (err) {
+                    this.socket.destroy(err);
                     return reject(err);
                 }
                 
-                resolve(true);
+                return resolve(true);
             });
 
             this.socket.write(buffer);
@@ -100,7 +132,7 @@ export class Socks {
      * 
      * @param {string} host - destination hostname (domain or IP address)
      * @param {number} port - destination port
-     * @throws {TorException} on connection failure
+     * @throws {Error} on connection failure
      */
     request(host: string, port: number) {
         const cmd = 0x01; // TCP/IP stream connection;
@@ -117,15 +149,15 @@ export class Socks {
                 let err;
 
                 if (chunk[0] !== socksVersion) {
-                    err =  new TorException('Invalid SOCKS version in response');
+                    err =  new Error('Invalid SOCKS version in response');
                 }
                 else if (chunk[1] !== 0x00) {
-                    const msg = this.getSocksError(chunk[1]);
-                    err = new TorException(msg);
+                    const msg = this.mapError(chunk[1]);
+                    err = new Error(msg);
                     
                 }
                 else if (chunk[2] !== reserved) {
-                    err = new TorException('Invalid SOCKS response shape');
+                    err = new Error('Invalid SOCKS response shape');
                 }
 
                 if (err) {
@@ -133,7 +165,7 @@ export class Socks {
                     return reject(err);
                 }
     
-                resolve(this.socket);
+                return resolve(this.socket);
             });
     
             this.socket.write(buffer);
@@ -159,7 +191,7 @@ export class Socks {
         }
     }
 
-    private getSocksError(status: number) {
+    private mapError(status: number) {
         switch(status) {
             case 0x01:
                 return 'General failure';
