@@ -65,7 +65,7 @@ export class Socks {
                 const err = new Error('SOCKS5 connection attempt timed out');
                 socket.destroy(err); // will notify error listener to reject
             }
-            
+
             socket.once('error', onError);
             socket.once('timeout', onTimeout);
             socket.once('connect', () => {
@@ -99,27 +99,40 @@ export class Socks {
         const buffer = Buffer.from(request);
 
         return new Promise<boolean>((resolve, reject) => {
+            // without close handler, Node.js app crashes silently.
+            const onClose = () => {
+                reject(new Error('SOCKS5 dropped connection'));
+            }
+
+            const onError = (err: Error) => {
+                this.socket.removeListener('close', onClose);
+                this.socket.destroy();
+                reject(err);
+            }
+
+            this.socket.once('close', onClose);
+            this.socket.once('error', onError);
             this.socket.once('data', chunk => {
                 let err;
 
                 if (chunk.length !== 2) {
                     err = new Error('Unexpected SOCKS response size');
                 }
-    
-                if (chunk[0] !== socksVersion) {
+                else if (chunk[0] !== socksVersion) {
                     err = new Error('Invalid SOCKS version in response');
                 }
-    
                 // TODO: add support for more auth methods
-                if (chunk[1] !== noPassMethod) {
+                else if (chunk[1] !== noPassMethod) {
                     err = new Error('Unexpected SOCKS authentication method');
                 }
 
                 if (err) {
                     this.socket.destroy(err);
-                    return reject(err);
+                    return;
                 }
                 
+                this.socket.removeListener('error', onError);
+                this.socket.removeListener('close', onClose);
                 return resolve(true);
             });
 
@@ -145,6 +158,18 @@ export class Socks {
         buffer.writeUInt16BE(port, buffer.length - 2);
 
         return new Promise<Socket>((resolve, reject) => {
+            const onClose = () => {
+                reject(new Error('SOCKS5 dropped connection'));
+            }
+
+            const onError = (err: Error) => {
+                this.socket.removeListener('close', onClose);
+                this.socket.destroy();
+                reject(err);
+            }
+
+            this.socket.once('error', onError);
+            this.socket.once('close', onClose);
             this.socket.once('data', chunk => {
                 let err;
 
@@ -162,9 +187,11 @@ export class Socks {
 
                 if (err) {
                     this.socket.destroy(err);
-                    return reject(err);
+                    return;
                 }
-    
+                
+                this.socket.removeListener('error', onError);
+                this.socket.removeListener('close', onClose);
                 return resolve(this.socket);
             });
     
