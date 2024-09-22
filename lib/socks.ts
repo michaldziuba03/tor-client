@@ -203,6 +203,7 @@ export class Socks {
                     return;
                 }
                 
+                this.socket.removeListener('data', onData);
                 this.socket.removeListener('error', onError);
                 this.socket.removeListener('close', onClose);
                 return resolve(this.socket);
