@@ -75,9 +75,8 @@ export class HttpClient {
         return new Promise<string>((resolve, reject) => {
             const req = client.request(url, requestOptions, res => {
                 const fileStream = createWriteStream(options.path);
-                fileStream.on('error', reject);
+                res.pipe(fileStream);
 
-                res.on('data', chunk => fileStream.write(chunk));
                 res.on('error', (err) => {
                     fileStream.end();
                     reject(err);

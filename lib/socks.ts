@@ -19,7 +19,7 @@
  * SOFTWARE.
  */
 
-import net, { Socket, isIP } from 'net';
+import net, { Socket, isIP } from 'node:net';
 
 const IPv4 = 4;
 const IPv6 = 6;
@@ -40,7 +40,10 @@ export interface SocksOptions {
  * Handles SOCKS5 protocol
  */
 export class Socks {
-    constructor(public readonly socket: Socket) {}
+    constructor(
+        public readonly socket: Socket, 
+        private readonly options: SocksOptions
+    ) {}
 
      /**
      * Connect to the SOCKS5 proxy server.
@@ -72,7 +75,7 @@ export class Socks {
                 socket.setTimeout(0);
                 socket.removeListener('error', onError);
                 socket.removeListener('timeout', onTimeout);
-                resolve(new Socks(socket));
+                resolve(new Socks(socket, options));
             });
         });
     }
@@ -168,6 +171,7 @@ export class Socks {
 
         return new Promise<Socket>((resolve, reject) => {
             let recv: Buffer = Buffer.alloc(0);
+            let expectedLength = 10;
 
             const onClose = () => {
                 reject(new Error('SOCKS5 dropped connection'));
@@ -182,8 +186,9 @@ export class Socks {
             const onData = (chunk: Buffer) => {
                 let err;
                 recv = Buffer.concat([recv, chunk]);
-                
-                if (recv.length < 3) {
+
+                // initial min size == 10
+                if (recv.length < expectedLength) {
                     return; // wait for more data
                 }
 
@@ -197,9 +202,26 @@ export class Socks {
                 else if (recv[2] !== reserved) {
                     err = new Error('Invalid SOCKS response shape');
                 }
+                
+                const addressType = recv[3];
+                expectedLength = 6;
+
+                if (addressType == 0x01) {
+                    expectedLength += 4;
+                } else if (addressType == 0x03) {
+                    expectedLength += recv[4] + 1;
+                } else if (addressType == 0x04) {
+                    expectedLength += 16;
+                } else {
+                    err = new Error('Unexpected address type');
+                }
 
                 if (err) {
                     this.socket.destroy(err);
+                    return;
+                }
+
+                if (recv.length < expectedLength) {
                     return;
                 }
                 
