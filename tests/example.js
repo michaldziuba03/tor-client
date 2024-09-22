@@ -6,9 +6,10 @@ async function test() {
     try {
         const client = new TorClient();
         const result = await client.get(URL, { timeout: 10 * 1000 });
-        
-        /* Testing with netcat:
+
+        /* Testing with netcat: 
         const socksClient = await Socks.connect({ socksHost: 'localhost', socksPort: 9050 });
+        //socksClient.socket.destroy();
         const result = await socksClient.request('localhost', 80);
         */
 

@@ -99,6 +99,7 @@ export class Socks {
         const buffer = Buffer.from(request);
 
         return new Promise<boolean>((resolve, reject) => {
+            let recv: Buffer = Buffer.alloc(0);
             // without close handler, Node.js app crashes silently.
             const onClose = () => {
                 reject(new Error('SOCKS5 dropped connection'));
@@ -110,19 +111,22 @@ export class Socks {
                 reject(err);
             }
 
-            this.socket.once('close', onClose);
-            this.socket.once('error', onError);
-            this.socket.once('data', chunk => {
+            const onData = (chunk: Buffer) => {
                 let err;
+                recv = Buffer.concat([recv, chunk]);
 
-                if (chunk.length !== 2) {
+                if (recv.length < 2) {
+                    return; // wait for more data
+                }
+                else if (recv.length > 2) {
                     err = new Error('Unexpected SOCKS response size');
                 }
-                else if (chunk[0] !== socksVersion) {
+
+                if (recv[0] !== socksVersion) {
                     err = new Error('Invalid SOCKS version in response');
                 }
                 // TODO: add support for more auth methods
-                else if (chunk[1] !== noPassMethod) {
+                else if (recv[1] !== noPassMethod) {
                     err = new Error('Unexpected SOCKS authentication method');
                 }
 
@@ -131,10 +135,15 @@ export class Socks {
                     return;
                 }
                 
+                this.socket.removeListener('data', onData);
                 this.socket.removeListener('error', onError);
                 this.socket.removeListener('close', onClose);
                 return resolve(true);
-            });
+            }
+
+            this.socket.once('close', onClose);
+            this.socket.once('error', onError);
+            this.socket.on('data', onData);
 
             this.socket.write(buffer);
         });
@@ -158,6 +167,8 @@ export class Socks {
         buffer.writeUInt16BE(port, buffer.length - 2);
 
         return new Promise<Socket>((resolve, reject) => {
+            let recv: Buffer = Buffer.alloc(0);
+
             const onClose = () => {
                 reject(new Error('SOCKS5 dropped connection'));
             }
@@ -168,20 +179,22 @@ export class Socks {
                 reject(err);
             }
 
-            this.socket.once('error', onError);
-            this.socket.once('close', onClose);
-            this.socket.once('data', chunk => {
+            const onData = (chunk: Buffer) => {
                 let err;
+                recv = Buffer.concat([recv, chunk]);
+                
+                if (recv.length < 3) {
+                    return; // wait for more data
+                }
 
-                if (chunk[0] !== socksVersion) {
+                if (recv[0] !== socksVersion) {
                     err =  new Error('Invalid SOCKS version in response');
                 }
-                else if (chunk[1] !== 0x00) {
+                else if (recv[1] !== 0x00) {
                     const msg = this.mapError(chunk[1]);
                     err = new Error(msg);
-                    
                 }
-                else if (chunk[2] !== reserved) {
+                else if (recv[2] !== reserved) {
                     err = new Error('Invalid SOCKS response shape');
                 }
 
@@ -193,7 +206,11 @@ export class Socks {
                 this.socket.removeListener('error', onError);
                 this.socket.removeListener('close', onClose);
                 return resolve(this.socket);
-            });
+            }
+
+            this.socket.once('error', onError);
+            this.socket.once('close', onClose);
+            this.socket.on('data', onData);
     
             this.socket.write(buffer);
         });
