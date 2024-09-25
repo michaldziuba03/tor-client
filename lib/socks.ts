@@ -40,10 +40,14 @@ export interface SocksOptions {
  * Handles SOCKS5 protocol
  */
 export class Socks {
+    private recv: Buffer;
+
     constructor(
         public readonly socket: Socket, 
         private readonly options: SocksOptions
-    ) {}
+    ) {
+        this.recv = Buffer.alloc(0);
+    }
 
      /**
      * Connect to the SOCKS5 proxy server.
@@ -102,7 +106,6 @@ export class Socks {
         const buffer = Buffer.from(request);
 
         return new Promise<boolean>((resolve, reject) => {
-            let recv: Buffer = Buffer.alloc(0);
             // without close handler, Node.js app crashes silently.
             const onClose = () => {
                 reject(new Error('SOCKS5 dropped connection'));
@@ -116,20 +119,17 @@ export class Socks {
 
             const onData = (chunk: Buffer) => {
                 let err;
-                recv = Buffer.concat([recv, chunk]);
+                this.recv = Buffer.concat([this.recv, chunk]);
 
-                if (recv.length < 2) {
+                if (this.recv.length < 2) {
                     return; // wait for more data
                 }
-                else if (recv.length > 2) {
-                    err = new Error('Unexpected SOCKS response size');
-                }
 
-                if (recv[0] !== socksVersion) {
+                if (this.recv[0] !== socksVersion) {
                     err = new Error('Invalid SOCKS version in response');
                 }
                 // TODO: add support for more auth methods
-                else if (recv[1] !== noPassMethod) {
+                else if (this.recv[1] !== noPassMethod) {
                     err = new Error('Unexpected SOCKS authentication method');
                 }
 
@@ -138,6 +138,7 @@ export class Socks {
                     return;
                 }
                 
+                this.recv = this.recv.subarray(2);
                 this.socket.removeListener('data', onData);
                 this.socket.removeListener('error', onError);
                 this.socket.removeListener('close', onClose);
@@ -170,7 +171,6 @@ export class Socks {
         buffer.writeUInt16BE(port, buffer.length - 2);
 
         return new Promise<Socket>((resolve, reject) => {
-            let recv: Buffer = Buffer.alloc(0);
             let expectedLength = 10;
 
             const onClose = () => {
@@ -185,31 +185,31 @@ export class Socks {
 
             const onData = (chunk: Buffer) => {
                 let err;
-                recv = Buffer.concat([recv, chunk]);
+                this.recv = Buffer.concat([this.recv, chunk]);
 
                 // initial min size == 10
-                if (recv.length < expectedLength) {
+                if (this.recv.length < expectedLength) {
                     return; // wait for more data
                 }
 
-                if (recv[0] !== socksVersion) {
+                if (this.recv[0] !== socksVersion) {
                     err =  new Error('Invalid SOCKS version in response');
                 }
-                else if (recv[1] !== 0x00) {
+                else if (this.recv[1] !== 0x00) {
                     const msg = this.mapError(chunk[1]);
                     err = new Error(msg);
                 }
-                else if (recv[2] !== reserved) {
+                else if (this.recv[2] !== reserved) {
                     err = new Error('Invalid SOCKS response shape');
                 }
                 
-                const addressType = recv[3];
+                const addressType = this.recv[3];
                 expectedLength = 6;
 
                 if (addressType == 0x01) {
                     expectedLength += 4;
                 } else if (addressType == 0x03) {
-                    expectedLength += recv[4] + 1;
+                    expectedLength += this.recv[4] + 1;
                 } else if (addressType == 0x04) {
                     expectedLength += 16;
                 } else {
@@ -221,13 +221,23 @@ export class Socks {
                     return;
                 }
 
-                if (recv.length < expectedLength) {
+                if (this.recv.length < expectedLength) {
                     return;
                 }
                 
                 this.socket.removeListener('data', onData);
                 this.socket.removeListener('error', onError);
                 this.socket.removeListener('close', onClose);
+                this.recv = this.recv.subarray(expectedLength);
+                
+                // if we have leftover, emit it to the user, it is not our problem anymore
+                if (this.recv.length > 0) {
+                    // I wonder if it may break message order
+                    setImmediate(() => {
+                        this.socket.emit('data', this.recv);
+                    });
+                }
+
                 return resolve(this.socket);
             }
 
@@ -239,7 +249,7 @@ export class Socks {
         });
     }
 
-    private parseHost(host: string) {
+    private parseHost(host: string): number[] {
         const type = isIP(host);
 
         if (type === IPv4) {

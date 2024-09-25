@@ -1,7 +1,8 @@
 const { TorClient, Socks } = require('../dist');
 
 //const URL = 'https://duckduckgogg42xjoc72x3sjasowoarfbgcmvfimaftt6twagswzczad.onion/?q=tor';
-const URL = 'https://duckduckgo.com';
+//const URL = 'https://duckduckgo.com';
+const URL = 'http://localhost:80';
 
 async function test() {
     try {
