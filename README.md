@@ -10,6 +10,9 @@
   A simple library for making HTTP requests over the Tor network programmatically in JavaScript.
 </p>
 
+> I do **NOT** recommend using this library with other runtimes such Deno or Bun.
+> It relies on HTTP Agent and for example Bun is not using HTTP Agent in every context so you can end up with making HTTP request without Tor...
+
 ## 🧅 Features
 
 - [x] Simple codebase

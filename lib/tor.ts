@@ -34,10 +34,11 @@ export class TorClient {
         return { port, host: urlObj.host, protocol: urlObj.protocol, pathname: urlObj.pathname }
     }
 
-    private async connectSocks(host: string, port: number) {
+    private async connectSocks(host: string, port: number, timeout?: number) {
         const socksOptions = {
             socksHost: this.options.socksHost || '127.0.0.1',
             socksPort: this.options.socksPort || 9050,
+            timeout,
         }
         const socks = await Socks.connect(socksOptions);
 
@@ -62,7 +63,7 @@ export class TorClient {
     async get(url: string, options: TorRequestOptions = {}) {
         const { protocol, host, port } = this.getDestination(url);
 
-        const socket = await this.connectSocks(host, port);
+        const socket = await this.connectSocks(host, port, options.timeout);
         const agent = this.createAgent(protocol, socket);
 
         return this.http.get(url, {

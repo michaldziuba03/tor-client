@@ -47,6 +47,12 @@ export class Socks {
         private readonly options: SocksOptions
     ) {
         this.recv = Buffer.alloc(0);
+        this.socket.on('timeout', this.onTimeout);
+    }
+
+    private onTimeout = () => {
+        const err = new Error('SOCKS5 connection attempt timed out');
+        this.socket.destroy(err);
     }
 
      /**
@@ -76,7 +82,6 @@ export class Socks {
             socket.once('error', onError);
             socket.once('timeout', onTimeout);
             socket.once('connect', () => {
-                socket.setTimeout(0);
                 socket.removeListener('error', onError);
                 socket.removeListener('timeout', onTimeout);
                 resolve(new Socks(socket, options));
@@ -102,6 +107,10 @@ export class Socks {
      * @throws {Error} on connection failure
      */
     initialize() {
+        if (this.socket.destroyed) {
+            throw new Error('SOCKS5 connection is already destroyed');
+        }
+
         const request = [socksVersion, authMethods, noPassMethod];
         const buffer = Buffer.from(request);
 
@@ -161,6 +170,10 @@ export class Socks {
      * @throws {Error} on connection failure
      */
     request(host: string, port: number) {
+        if (this.socket.destroyed) {
+            throw new Error('SOCKS5 connection is already destroyed');
+        }
+
         const cmd = 0x01; // TCP/IP stream connection;
         const reserved = 0x00; // reserved byte;
         const parsedHost = this.parseHost(host); // parsed host type, host length and host value
@@ -228,6 +241,7 @@ export class Socks {
                 this.socket.removeListener('data', onData);
                 this.socket.removeListener('error', onError);
                 this.socket.removeListener('close', onClose);
+                this.socket.removeListener('timeout', this.onTimeout);
                 this.recv = this.recv.subarray(expectedLength);
                 
                 // if we have leftover, emit it to the user, it is not our problem anymore
