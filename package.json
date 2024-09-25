@@ -2,14 +2,16 @@
   "name": "@md03/tor",
   "version": "1.0.0",
   "description": "Node.js Tor client without dependencies",
-  "main": "dist/index.js",
+  "main": "dist/cjs/index.js",
+  "typings": "dist/cjs/index.d.ts",
+  "module": "dist/esm/index.js",
   "files": [
     "dist"
   ],
   "scripts": {
     "prepare": "husky",
     "test": "jest",
-    "build": "rimraf dist && tsc",
+    "build": "rimraf dist && tsc && tsc -p tsconfig.module.json",
     "sample": "node ./tests/example.js"
   },
   "repository": {

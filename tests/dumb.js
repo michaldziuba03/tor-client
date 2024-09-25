@@ -31,9 +31,8 @@ function handleConnectionRequest(socket, chunk) {
   
   const response = Buffer.from([0x5, 0x0, 0x0, 0x01, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0]);
   const httpResponse = 'HTTP/1.1 200 OK\r\nContent-Length: 13\r\n\r\nHello, World!';
-  //socket.write(Buffer.concat([response, Buffer.from(httpResponse)]));
-  //socket.write('HTTP/1.1 200 OK\r\nContent-Length: 3\r\n\r\nHuh');
-  socket.write(response);
+  socket.write(Buffer.concat([response, Buffer.from(httpResponse)]));
+  //socket.write(response);
 
   socket.removeAllListeners('data');
   socket.on('data', (data) => dumbTunnel(socket, data));

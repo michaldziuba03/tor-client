@@ -1,4 +1,4 @@
-const { TorClient, Socks } = require('../dist');
+const { TorClient, Socks } = require('@md03/tor');
 
 //const URL = 'https://duckduckgogg42xjoc72x3sjasowoarfbgcmvfimaftt6twagswzczad.onion/?q=tor';
 //const URL = 'https://duckduckgo.com';

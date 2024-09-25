@@ -232,8 +232,10 @@ export class Socks {
                 
                 // if we have leftover, emit it to the user, it is not our problem anymore
                 if (this.recv.length > 0) {
-                    // I wonder if it may break message order
-                    setImmediate(() => {
+                    /* setTimeout should be safer than setImmediate, because it runs almost 
+                     * as soon as possible in the next event loop iteration (before network callbacks)
+                     */
+                    setTimeout(() => {
                         this.socket.emit('data', this.recv);
                     });
                 }

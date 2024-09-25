@@ -1,0 +1,11 @@
+{
+  "extends": "./tsconfig",
+  "compilerOptions": {
+    "target": "esnext",
+    "outDir": "dist/esm",
+    "module": "ES6",
+    "moduleResolution": "NodeNext",
+    "esModuleInterop": true,
+  },
+  "exclude": ["tests", "downloads", "node_modules/**"]
+}
