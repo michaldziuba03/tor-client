@@ -10,7 +10,7 @@
   ],
   "scripts": {
     "prepare": "husky",
-    "test": "jest",
+    "test": "node --import tsx --test tests/*.spec.ts",
     "build": "rimraf dist && tsc && tsc -p tsconfig.module.json",
     "sample": "node ./tests/example.js"
   },
@@ -37,17 +37,11 @@
   "devDependencies": {
     "@commitlint/cli": "^19.5.0",
     "@commitlint/config-conventional": "^19.5.0",
-    "@types/jest": "^27.5.2",
     "@types/node": "^16.18.108",
     "husky": "^9.1.6",
-    "jest": "^27.5.1",
     "rimraf": "^6.0.1",
-    "ts-jest": "^27.1.5",
+    "tsx": "^4.19.1",
     "typescript": "^4.9.5"
-  },
-  "jest": {
-    "preset": "ts-jest",
-    "testTimeout": 60000
   },
   "commitlint": {
     "extends": [

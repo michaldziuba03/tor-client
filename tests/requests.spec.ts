@@ -1,3 +1,5 @@
+import { describe, test } from 'node:test';
+import { equal, ok } from 'node:assert/strict';
 import { TorClient } from '../lib';
 
 const onionUrls = {
@@ -8,41 +10,38 @@ const onionUrls = {
 describe('Test HTTP requests', () => {
     const client = new TorClient();
 
-    it('should be configured to TOR', async () => {
+    test('should be configured to TOR', async () => {
         const res = await client.torcheck();
-
-        expect(res).toEqual(true);
+        ok(res);
     });
 
-    it('should make GET request to duckduckgo hidden services', async () => {
+    test('should make GET request to duckduckgo hidden services', async () => {
         const url = onionUrls.duckduckgo + '?q=linux';
         const res = await client.get(url);
         
-        expect(res.status).toEqual(200);
-        expect(res.data.includes('linux at DuckDuckGo')).toBeTruthy();
+        equal(res.status, 200);
+        ok(res.data.includes('linux at DuckDuckGo'));
     });
 
-    it('should make POST request to duckduckgo hidden services', async () => {
+    test('should make POST request to duckduckgo hidden services', async () => {
         const url = onionUrls.duckduckgo;
         const res = await client.post(url, { q: 'linux' });
         
-        expect(res.status).toEqual(200);
-        expect(res.data.includes('linux at DuckDuckGo')).toBeTruthy();
+        equal(res.status, 200);
+        ok(res.data.includes('linux at DuckDuckGo'));
     });
 
-    it('should make GET request to regular website', async () => {
+    test('should make GET request to regular website', async () => {
         const url = 'https://en.wikipedia.org/wiki/Tor';
         const res = await client.get(url);
 
-        expect(res.status).toEqual(200);
-        expect(res.data).toBeDefined();
+        equal(res.status, 200);
     });
 
-    it('should make GET request to ahmia hidden services', async () => {
+    test('should make GET request to ahmia hidden services', async () => {
         const url = onionUrls.ahmia;
         const res = await client.get(url);
 
-        expect(res.status).toEqual(200);
-        expect(res.data).toBeDefined();
+        equal(res.status, 200);
     })
 });
