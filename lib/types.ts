@@ -16,10 +16,10 @@ export interface TorClientOptions {
     socksPort?: number;
 }
 
-export interface HttpResponse {
+export interface HttpResponse<TResponseData = string> {
     status: number;
     headers: IncomingHttpHeaders;
-    data: string;
+    data: TResponseData;
 }
 
 export interface HttpOptions {
@@ -35,8 +35,3 @@ export interface DownloadOptions extends HttpOptions {
 }
 
 export type SocksAgent =  HttpAgent | HttpsAgent;
-
-export interface SocksOptions {
-    socksHost: string;
-    socksPort: number;
-}

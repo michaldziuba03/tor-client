@@ -1,13 +1,17 @@
 import { createWriteStream } from 'fs';
 import http from 'http';
 import https, { RequestOptions } from 'https';
+import qs from 'querystring';
+
 import { ALLOWED_PROTOCOLS } from './constants';
 import { DownloadOptions, HttpOptions, HttpResponse } from './types';
 import { headers, HttpMethod, MimeTypes } from './constants';
-import { formParser } from './parsers';
-import { buildResponse, dnsLeakDefender } from './utils';
+import { buildResponse, preventDNSLookup } from './utils';
+import { TorHttpException } from './exceptions';
 
-
+/**
+ * Wrapper around `http` module for making HTTP requests over Tor.
+ */
 export class HttpClient {
     private getClient(protocol: string) {
         if (protocol === 'http:') return http;
@@ -18,11 +22,11 @@ export class HttpClient {
     private createRequestOptions(url: string, options: HttpOptions) {
         const { protocol } = new URL(url);
         if (!ALLOWED_PROTOCOLS.includes(protocol)) {
-            throw new Error('Invalid HTTP protocol in url');
+            throw new TorHttpException('Invalid HTTP protocol in URL');
         }
 
         if (!options.agent) {
-            throw new Error('HttpAgent is required for TOR requests');
+            throw new TorHttpException('HttpAgent is required for TOR requests');
         }
 
         const client = this.getClient(protocol);
@@ -30,7 +34,7 @@ export class HttpClient {
             headers: { ...headers, ...options.headers },
             method: options.method,
             agent: options.agent,
-            lookup: dnsLeakDefender,
+            lookup: preventDNSLookup,
         }
 
         return { client, requestOptions }
@@ -55,7 +59,7 @@ export class HttpClient {
             if (options.timeout) req.setTimeout(options.timeout);
 
             req.on('error', reject);
-            req.on('timeout', () => reject(new Error('Http request timeout')));
+            req.on('timeout', () => reject(new TorHttpException('Http request timeout')));
 
             if (options.data) {
                 req.write(options.data);
@@ -71,9 +75,8 @@ export class HttpClient {
         return new Promise<string>((resolve, reject) => {
             const req = client.request(url, requestOptions, res => {
                 const fileStream = createWriteStream(options.path);
-                fileStream.on('error', reject);
+                res.pipe(fileStream);
 
-                res.on('data', chunk => fileStream.write(chunk));
                 res.on('error', (err) => {
                     fileStream.end();
                     reject(err);
@@ -87,8 +90,15 @@ export class HttpClient {
 
             if (options.timeout) req.setTimeout(options.timeout);
             req.on('error', reject);
-            req.on('timeout', () => reject(new Error('Download timeout')));
+            req.on('timeout', () => reject(new TorHttpException('Download timeout')));
             req.end();
+        });
+    }
+
+    delete(url: string, options: HttpOptions = {}) {
+        return this.request(url, {
+            ...options,
+            method: HttpMethod.DELETE,
         });
     }
 
@@ -100,11 +110,41 @@ export class HttpClient {
     }
 
     post(url: string, data: object, options: HttpOptions = {}) {
-        const dataString = formParser(data);
+        const dataString = qs.stringify(data as Record<string, string>);
         return this.request(url, { 
             agent: options.agent,
             timeout: options.timeout,
             method: HttpMethod.POST, 
+            data: dataString,
+            headers: {
+                'Content-Type': MimeTypes.FORM,
+                'Content-Length': dataString.length,
+                ...options.headers,
+            },
+        });
+    }
+
+    put(url: string, data: object, options: HttpOptions = {}) {
+        const dataString = qs.stringify(data as Record<string, string>);
+        return this.request(url, { 
+            agent: options.agent,
+            timeout: options.timeout,
+            method: HttpMethod.PUT, 
+            data: dataString,
+            headers: {
+                'Content-Type': MimeTypes.FORM,
+                'Content-Length': dataString.length,
+                ...options.headers,
+            },
+        });
+    }
+
+    patch(url: string, data: object, options: HttpOptions = {}) {
+        const dataString = qs.stringify(data as Record<string, string>);
+        return this.request(url, { 
+            agent: options.agent,
+            timeout: options.timeout,
+            method: HttpMethod.PATCH, 
             data: dataString,
             headers: {
                 'Content-Type': MimeTypes.FORM,
